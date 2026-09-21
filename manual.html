@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Manual de uso · BubaManía</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F3EEFB;--surface:#fff;--ink:#2B1745;--muted:#6E5C86;--taro:#7A4FD0;--taro-soft:#DCCDF7;--mango:#FFB21E;--pink:#F2507F;--line:#D9CEEB;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1A1026;--surface:#261838;--ink:#F3ECFF;--muted:#B7A6D1;--taro:#A383F0;--taro-soft:#3E2A5E;--line:#3E2D57}}
+:root[data-theme="dark"]{--bg:#1A1026;--surface:#261838;--ink:#F3ECFF;--muted:#B7A6D1;--taro:#A383F0;--taro-soft:#3E2A5E;--line:#3E2D57}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 12px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;font-size:17px;line-height:1.55}
+h1,h2,h3{font-family:"Fredoka","DM Sans",system-ui,sans-serif;font-weight:600;line-height:1.15}
+main{max-width:760px;margin:0 auto;padding:28px 18px 64px}
+.logo{display:flex;gap:4px;align-items:flex-end}
+.logo i{display:block;width:12px;height:12px;border-radius:50%;background:var(--ink)}
+.logo i:nth-child(2){width:16px;height:16px;background:var(--taro)}.logo i:nth-child(3){background:var(--pink)}
+h1{font-size:44px;margin:8px 0 4px}
+.lead{color:var(--muted);margin:0 0 20px}
+nav.toc{background:var(--surface);border:1.5px solid var(--line);border-radius:20px;padding:14px 18px}
+nav.toc ol{margin:6px 0 0;padding-left:22px;columns:2;column-gap:28px}
+nav.toc a{color:var(--ink)}
+@media (max-width:560px){nav.toc ol{columns:1}}
+section{margin-top:40px}
+h2{font-size:30px;margin:0 0 8px;display:flex;align-items:baseline;gap:10px}
+h2 .n{font-size:18px;color:var(--taro);background:var(--taro-soft);border-radius:999px;padding:2px 10px}
+h3{font-size:21px;margin:22px 0 6px}
+ol.steps{padding-left:22px}ol.steps li{margin:6px 0}
+figure{margin:16px 0;display:flex;flex-direction:column;align-items:center}
+figure img{max-width:330px;width:100%;border-radius:22px;border:1.5px solid var(--line);box-shadow:0 2px 0 rgba(43,23,69,.12);background:#fff}
+figure img.wide{max-width:560px}
+figcaption{font-size:14px;color:var(--muted);margin-top:8px;text-align:center;max-width:420px}
+.pair{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:640px){.pair{grid-template-columns:1fr}}
+.tip{background:var(--surface);border-left:5px solid var(--mango);border-radius:12px;padding:10px 14px;margin:14px 0}
+.tip.warn{border-left-color:var(--pink)}
+kbd,.ui{font-family:inherit;font-weight:700;background:var(--taro-soft);border-radius:8px;padding:1px 7px;white-space:nowrap}
+table{border-collapse:collapse;width:100%}td,th{padding:8px 6px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+.table-wrap{overflow-x:auto}
+footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
+@media print{
+  body{background:#fff;font-size:12pt}
+  nav.toc{break-after:page}
+  section{break-before:page;margin-top:0}
+  figure{break-inside:avoid}
+  figure img{max-width:62mm;box-shadow:none}
+  figure img.wide{max-width:120mm}
+  a{color:inherit;text-decoration:none}
+  @page{margin:14mm}
+}
+</style>
+</head>
+<body>
+<main>
+<div class="logo" aria-hidden="true"><i></i><i></i><i></i></div>
+<h1>Manual de uso</h1>
+<p class="lead">BubaManía · versión 1.2.0 · para caja, meseros y cocina · <a href="manual/manual.pdf">Descargar PDF</a></p>
+
+<nav class="toc" aria-label="Contenido"><strong>Contenido</strong>
+<ol>
+  <li><a href="#entrar">Entrar e instalar la app</a></li>
+  <li><a href="#pedido">Tomar un pedido</a></li>
+  <li><a href="#precios">Cambiar precios y combinaciones</a></li>
+  <li><a href="#cocina">Cocina y barra</a></li>
+  <li><a href="#cobrar">Cobrar</a></li>
+  <li><a href="#tickets">Tickets</a></li>
+  <li><a href="#meseros">Meseros</a></li>
+  <li><a href="#propinas">Propinas</a></li>
+  <li><a href="#menu">Menú y fotos</a></li>
+  <li><a href="#qr">Código QR para clientes</a></li>
+  <li><a href="#caja">Corte de caja</a></li>
+  <li><a href="#mejoras">Mejoras para la app</a></li>
+  <li><a href="#domicilio">Pedidos a domicilio</a></li>
+  <li><a href="#reparto">Pantalla de reparto</a></li>
+  <li><a href="#config-reparto">Configurar el reparto</a></li>
+  <li><a href="#problemas">Problemas frecuentes</a></li>
+</ol></nav>
+
+<section id="entrar">
+<h2><span class="n">1</span>Entrar e instalar la app</h2>
+<p>Cada integrante del personal entra con el correo y la contraseña que le dio el encargado. La sesión se queda abierta en ese celular.</p>
+<figure><img src="manual/01-login.png" alt="Pantalla de inicio de sesión"><figcaption>Pantalla de entrada. Desde aquí también se abre el menú para clientes y este manual.</figcaption></figure>
+<h3>Instalar como app</h3>
+<ol class="steps">
+  <li><strong>iPhone:</strong> abre la app en Safari, toca Compartir y elige <span class="ui">Agregar a inicio</span>.</li>
+  <li><strong>Android:</strong> abre la app en Chrome, toca el menú ⋮ y elige <span class="ui">Instalar app</span> o <span class="ui">Agregar a pantalla principal</span>.</li>
+</ol>
+<p>Abajo verás cinco secciones: <span class="ui">Pedidos</span>, <span class="ui">Cocina</span>, <span class="ui">Menú</span>, <span class="ui">Caja</span> y <span class="ui">Ajustes</span>. Arriba a la derecha, <strong>En vivo</strong> indica que el celular está sincronizado con los demás.</p>
+</section>
+
+<section id="pedido">
+<h2><span class="n">2</span>Tomar un pedido</h2>
+<div class="pair">
+<figure><img src="manual/02-pedidos.png" alt="Lista de pedidos activos"><figcaption>Pedidos activos con su estado, mesero y total. Los botones de arriba filtran por mesero.</figcaption></figure>
+<figure><img src="manual/03-nuevo-pedido.png" alt="Crear nuevo pedido"><figcaption>Nuevo pedido: tipo, origen, mesa y mesero.</figcaption></figure>
+</div>
+<ol class="steps">
+  <li>Toca <span class="ui">+ Nuevo pedido</span> y elige el <strong>tipo</strong> (En local, Para llevar o Domicilio) y <strong>por dónde llegó</strong> (Presencial, Llamada, WhatsApp o Plataforma).</li>
+  <li>En local escribe la mesa; para llevar, el nombre del cliente. Los pedidos a domicilio se explican en la <a href="#domicilio">sección 13</a>.</li>
+  <li>Elige el mesero y toca <span class="ui">Crear pedido</span>.</li>
+  <li>Para separar cuentas, toca <span class="ui">+ Persona</span> y escribe su nombre.</li>
+  <li>Selecciona a la persona (su botón se pone oscuro) y toca los productos que pidió. Cada toque suma una pieza.</li>
+  <li>Usa <span class="ui">−</span> y <span class="ui">+</span> para ajustar cantidades, y <span class="ui">Agregar nota</span> para indicaciones como “sin hielo”.</li>
+</ol>
+<div class="pair">
+<figure><img src="manual/04-pedido.png" alt="Pedido abierto con personas y productos"><figcaption>Arriba, las personas con su subtotal. En medio, las categorías y productos.</figcaption></figure>
+<figure><img src="manual/05-cuentas.png" alt="Cuentas separadas por persona"><figcaption>Abajo, la cuenta de cada persona. El total del pedido se ve siempre al pie.</figcaption></figure>
+</div>
+<div class="tip">Para juntar dos cuentas, toca el nombre de la persona y usa <span class="ui">Juntar cuentas</span>. Sus productos pasan a la otra persona.</div>
+</section>
+
+<section id="precios">
+<h2><span class="n">3</span>Cambiar precios y combinaciones</h2>
+<p>Los precios salen del menú, pero puedes cambiarlos en cualquier pedido sin tocar el menú.</p>
+<div class="pair">
+<figure><img src="manual/06-editar-precio.png" alt="Editar precio de un producto en el pedido"><figcaption>Toca el importe subrayado de un producto para cambiar su precio o su descripción.</figcaption></figure>
+<figure><img src="manual/07-producto-libre.png" alt="Agregar producto libre"><figcaption><span class="ui">+ Producto libre / combinación</span> sirve para lo que no está en el menú.</figcaption></figure>
+</div>
+<p>Los precios modificados se ven en <strong style="color:var(--pink)">rosa</strong> para que caja sepa que no son los del menú. Con <span class="ui">Usar precio del menú</span> regresas al original.</p>
+</section>
+
+<section id="cocina">
+<h2><span class="n">4</span>Cocina y barra</h2>
+<ol class="steps">
+  <li>Cuando el pedido esté completo, el mesero toca <span class="ui">Enviar a cocina</span>.</li>
+  <li>En el celular o tableta de cocina, la sección <span class="ui">Cocina</span> muestra el pedido al instante, con notas en rosa.</li>
+  <li>Al terminar, cocina toca <span class="ui">Marcar como listo</span> y el pedido cambia a <strong>Listo</strong> en todos los celulares.</li>
+</ol>
+<figure><img src="manual/11-cocina.png" alt="Pantalla de cocina"><figcaption>El número rojo sobre “Cocina” indica cuántos pedidos esperan.</figcaption></figure>
+<div class="tip">Si agregas productos a un pedido que ya estaba listo, regresa solo a cocina y ahí aparecen únicamente los productos nuevos.</div>
+</section>
+
+<section id="cobrar">
+<h2><span class="n">5</span>Cobrar</h2>
+<ol class="steps">
+  <li>Dentro del pedido toca <span class="ui">Cobrar</span>.</li>
+  <li>Elige quién paga: una persona o <span class="ui">Todos juntos</span>.</li>
+  <li>Elige la forma de pago: efectivo, tarjeta o transferencia.</li>
+  <li>En efectivo, escribe cuánto te dieron y la app calcula el cambio.</li>
+  <li>Si dejan propina, escríbela. Se suma al total a cobrar y se asigna al mesero del pedido.</li>
+  <li>Toca <span class="ui">Registrar pago</span>. La app pregunta si quieres imprimir el ticket.</li>
+</ol>
+<figure><img src="manual/08-cobrar.png" alt="Pantalla de cobro"><figcaption>Cobro de Diego: $190 más $20 de propina, pagó con $250 y el cambio es de $40.</figcaption></figure>
+<p>Cuando todas las personas pagaron, el pedido pasa a <strong>Pagado</strong> y sale de la lista de activos. Lo encuentras en <span class="ui">Caja</span>.</p>
+</section>
+
+<section id="tickets">
+<h2><span class="n">6</span>Tickets</h2>
+<div class="pair">
+<figure><img src="manual/09-opciones-ticket.png" alt="Opciones de ticket"><figcaption>Botón <span class="ui">Ticket</span>: cuenta completa, por persona o por WhatsApp.</figcaption></figure>
+<figure><img src="manual/10-ticket.png" alt="Ejemplo de ticket impreso" style="max-width:280px;border-radius:6px"><figcaption>Así sale el ticket de 80 mm, con el nombre de quien atendió.</figcaption></figure>
+</div>
+<ol class="steps">
+  <li>Se abre el diálogo de impresión del celular. Elige tu impresora de tickets.</li>
+  <li>Si el texto sale cortado o muy chico, revisa en <span class="ui">Ajustes</span> que el ancho de papel (58 u 80 mm) coincida con tu impresora.</li>
+  <li>Usa <span class="ui">Imprimir ticket de prueba</span> en Ajustes para probar sin crear un pedido.</li>
+</ol>
+</section>
+
+<section id="meseros">
+<h2><span class="n">7</span>Meseros</h2>
+<figure><img src="manual/16-meseros.png" alt="Alta de meseros y forma de reparto de propinas" class="wide"><figcaption>Ajustes → Meseros y propinas.</figcaption></figure>
+<ol class="steps">
+  <li>En <span class="ui">Ajustes</span>, escribe el nombre del mesero y toca <span class="ui">Agregar</span>.</li>
+  <li>Al crear un pedido, elige el mesero. La app recuerda el último filtro usado en ese celular.</li>
+  <li>Para cambiar el mesero de un pedido, ábrelo y toca <span class="ui">⋯</span> arriba a la derecha.</li>
+  <li>En <span class="ui">Pedidos</span>, los botones con nombres muestran solo los pedidos de ese mesero.</li>
+</ol>
+<div class="tip">Si cada mesero tiene su propio celular, conviene filtrar su nombre una vez. Así ve solo sus mesas y sus pedidos nuevos quedan a su nombre.</div>
+</section>
+
+<section id="propinas">
+<h2><span class="n">8</span>Propinas</h2>
+<p>En <span class="ui">Ajustes</span> eliges cómo se reparten:</p>
+<div class="table-wrap"><table>
+<tr><th>Modo</th><th>Cómo funciona</th></tr>
+<tr><td><strong>Cada mesero las suyas</strong></td><td>Cada propina va al mesero del pedido donde se cobró.</td></tr>
+<tr><td><strong>Fondo común en partes iguales</strong></td><td>Todas las propinas del día se suman y se dividen entre los meseros que marques en Caja.</td></tr>
+</table></div>
+<div class="pair">
+<figure><img src="manual/14-caja.png" alt="Corte de caja con propinas por mesero"><figcaption>Modo individual: cada mesero recibe lo que le dejaron.</figcaption></figure>
+<figure><img src="manual/19-propinas-comun.png" alt="Reparto de fondo común" class="wide"><figcaption>Fondo común: $85 entre 3 meseros, $28.33 cada uno. Desmarca a quien no trabajó ese turno.</figcaption></figure>
+</div>
+<div class="tip warn">Las propinas de pedidos sin mesero no se reparten en el modo individual. Asigna el mesero desde el pedido (⋯) para corregirlo.</div>
+</section>
+
+<section id="menu">
+<h2><span class="n">9</span>Menú y fotos</h2>
+<div class="pair">
+<figure><img src="manual/12-menu.png" alt="Lista de productos del menú"><figcaption>Productos agrupados por categoría.</figcaption></figure>
+<figure><img src="manual/13-editar-producto.png" alt="Editar producto"><figcaption>Foto, nombre, precio, categoría, descripción y disponibilidad.</figcaption></figure>
+</div>
+<ol class="steps">
+  <li>Toca <span class="ui">+ Producto</span> o <span class="ui">Editar</span>.</li>
+  <li><span class="ui">Agregar foto</span> abre la cámara o la galería. La foto se reduce sola para que cargue rápido.</li>
+  <li>Para una categoría nueva, elige <span class="ui">+ Nueva categoría…</span> en la lista.</li>
+  <li>Desmarca <span class="ui">Disponible</span> cuando algo se agote. En el menú de clientes aparecerá como “Agotado por hoy”.</li>
+  <li>En <span class="ui">Menú impreso</span> puedes subir fotos o el PDF de tu menú físico para que los clientes también lo vean.</li>
+</ol>
+</section>
+
+<section id="qr">
+<h2><span class="n">10</span>Código QR para clientes</h2>
+<div class="pair">
+<figure><img src="manual/18-qr.png" alt="Generar e imprimir QR"><figcaption>Ajustes → Código QR del menú.</figcaption></figure>
+<figure><img src="manual/20-menu-cliente.png" alt="Menú que ve el cliente"><figcaption>Lo que ve el cliente al escanear. Se actualiza solo al cambiar precios.</figcaption></figure>
+</div>
+<ol class="steps">
+  <li>El enlace del menú ya viene puesto. Toca <span class="ui">Generar QR</span>.</li>
+  <li>Toca <span class="ui">Imprimir QR</span> para una hoja con el nombre del negocio, lista para enmicar y poner en las mesas.</li>
+  <li>No necesitas reimprimir el QR cuando cambies el menú.</li>
+</ol>
+</section>
+
+<section id="caja">
+<h2><span class="n">11</span>Corte de caja</h2>
+<p>La sección <span class="ui">Caja</span> muestra el día actual. Con el calendario de arriba consultas días anteriores.</p>
+<ol class="steps">
+  <li><strong>Ventas cobradas</strong> y <strong>Por forma de pago</strong>: lo que debe haber en efectivo, terminal y transferencias.</li>
+  <li><strong>Por cobrar</strong>: pedidos abiertos que aún no pagan.</li>
+  <li><strong>Por mesero</strong>: ventas y propina a entregar a cada uno.</li>
+  <li><strong>Lo más vendido</strong> y <strong>Pedidos del día</strong>. Toca un pedido para abrirlo.</li>
+  <li><span class="ui">Imprimir corte</span> saca todo en formato de ticket.</li>
+</ol>
+</section>
+
+<section id="mejoras">
+<h2><span class="n">12</span>Mejoras para la app</h2>
+<p>Cualquier integrante del personal puede anotar errores o ideas en el momento en que surgen. Después se mandan a Claude en una sola lista.</p>
+<figure><img src="manual/17-mejoras.png" alt="Sección de mejoras" class="wide"><figcaption>Ajustes → Mejoras para la app.</figcaption></figure>
+<ol class="steps">
+  <li>Describe qué pasa o qué quieres. Sé específico: en qué pantalla, qué esperabas y qué pasó.</li>
+  <li>Elige el tipo (<strong>Error</strong>, <strong>Mejora</strong> o <strong>Idea</strong>) y la prioridad, y toca <span class="ui">Agregar a la lista</span>.</li>
+  <li>Cuando quieras actualizar la app, toca <span class="ui">Copiar lista para Claude</span> y pégala en tu chat con Claude.</li>
+  <li>La app pregunta si las marcas como <strong>enviadas</strong>. Cuando Claude entregue la nueva versión, márcalas como <strong>hechas</strong> con el botón ⋯.</li>
+</ol>
+<div class="tip">La lista copiada incluye la versión actual, quién pidió cada cosa y la petición de recibir primero los requisitos. Así Claude tiene el contexto completo.</div>
+</section>
+
+<section id="domicilio">
+<h2><span class="n">13</span>Pedidos a domicilio</h2>
+<div class="pair">
+<figure><img src="manual/21-nuevo-domicilio.png" alt="Nuevo pedido a domicilio"><figcaption>Tipo Domicilio y origen WhatsApp.</figcaption></figure>
+<figure><img src="manual/22-entrega.png" alt="Datos de entrega con mapa"><figcaption>Datos de entrega: teléfono, ubicación, mapa, km, tiempo y envío.</figcaption></figure>
+</div>
+<ol class="steps">
+  <li>Crea el pedido con tipo <span class="ui">Domicilio</span> y el origen correcto. Se abre sola la ventana <strong>Datos de entrega</strong>.</li>
+  <li>Escribe el <strong>teléfono</strong>. Si el cliente ya pidió antes, se llenan solos su nombre, dirección y ubicación.</li>
+  <li>En <strong>Ubicación</strong> pega el enlace de ubicación del cliente o escribe la dirección. Para obtener el enlace, abre en Google Maps la ubicación que mandó por WhatsApp y usa <span class="ui">Compartir → Copiar</span>; el paso exacto cambia según el celular. También puedes pedirle que te mande el enlace de Google Maps directamente. Toca <span class="ui">Ubicar y calcular</span>.</li>
+  <li>Revisa el pin rosa 🏠 en el mapa. Si no está en la casa correcta, arrástralo o toca el punto exacto; los km se recalculan.</li>
+  <li>El <strong>costo de envío</strong> se calcula solo con la regla de Ajustes, pero lo puedes cambiar.</li>
+  <li>Indica cómo paga: <span class="ui">Paga al recibir</span> (y con cuánto, para llevar cambio), <span class="ui">Ya pagó</span> o <span class="ui">Por plataforma</span>.</li>
+  <li>Elige el repartidor y toca <span class="ui">Guardar entrega</span>. Después agrega los productos como en cualquier pedido.</li>
+</ol>
+<figure><img src="manual/23-pedido-domicilio.png" alt="Pedido a domicilio abierto"><figcaption>El recuadro amarillo resume la entrega. <span class="ui">WhatsApp</span> manda al cliente la confirmación con total y tiempo estimado.</figcaption></figure>
+<div class="tip">Si el cálculo dice <strong>(aprox.)</strong>, se usó una estimación en línea recta porque la función de rutas no respondió. El botón <span class="ui">Ruta</span> siempre abre Google Maps con el camino real.</div>
+<div class="tip warn">Pide al cliente que comparta su <strong>ubicación actual</strong> y no una “ubicación en tiempo real”: esta última no se puede copiar como enlace.</div>
+</section>
+
+<section id="reparto">
+<h2><span class="n">14</span>Pantalla de reparto</h2>
+<div class="pair">
+<figure><img src="manual/24-reparto.png" alt="Pantalla de reparto"><figcaption>Entregas pendientes con dirección, referencias, cobro y cambio.</figcaption></figure>
+<figure><img src="manual/25-entregar-cobrar.png" alt="Entregar y cobrar"><figcaption>Al entregar se registra el cobro y el cambio.</figcaption></figure>
+</div>
+<ol class="steps">
+  <li>El repartidor abre <span class="ui">Reparto</span> y toca su nombre arriba para ver solo sus entregas. Con <span class="ui">Lo llevo yo</span> toma una entrega sin asignar.</li>
+  <li><span class="ui">Ruta en Maps</span> abre Google Maps con la navegación; <span class="ui">Llamar</span> y <span class="ui">WhatsApp</span> contactan al cliente.</li>
+  <li>Al salir toca <span class="ui">Salí a entregar</span>. La app ofrece avisar al cliente por WhatsApp que va en camino.</li>
+  <li>Al llegar toca <span class="ui">Entregado</span>, elige cómo pagó y confirma. Si ya estaba pagado, solo se marca como entregado.</li>
+</ol>
+<div class="pair">
+<figure><img src="manual/26-ticket-domicilio.png" alt="Ticket de domicilio" style="max-width:280px;border-radius:6px"><figcaption>Ticket con datos de entrega, envío y cambio a llevar.</figcaption></figure>
+<figure><img src="manual/30-modo-reparto.png" alt="Celular en modo reparto"><figcaption>Celular en modo “Solo reparto”: solo ve Reparto y Ajustes.</figcaption></figure>
+</div>
+<div class="tip">Los pedidos de <strong>plataformas</strong> (Didi, Uber Eats, Rappi) aparecen aquí con la plataforma como repartidor, para saber cuáles recoge su repartidor.</div>
+</section>
+
+<section id="config-reparto">
+<h2><span class="n">15</span>Configurar el reparto</h2>
+<div class="pair">
+<figure><img src="manual/27-ajustes-reparto.png" alt="Ajustes de reparto"><figcaption>Ajustes → Reparto a domicilio.</figcaption></figure>
+<div>
+<figure><img src="manual/28-modo-celular.png" alt="Modo del celular" class="wide"><figcaption>Ajustes → Este celular.</figcaption></figure>
+<figure><img src="manual/29-caja-canal.png" alt="Ventas por canal" class="wide"><figcaption>Caja → Por canal y entregas por repartidor.</figcaption></figure>
+</div></div>
+<ol class="steps">
+  <li><strong>Ubicación del local:</strong> dentro del local toca <span class="ui">Usar mi ubicación actual</span> y acepta el permiso. También puedes pegar un enlace de Google Maps del local.</li>
+  <li><strong>Envío:</strong> define hasta cuántos km es gratis, el cargo al exceder y el cargo por cada km extra. Abajo aparece un ejemplo del cálculo.</li>
+  <li><strong>Tiempo de preparación:</strong> se suma al tiempo de ruta en el mensaje de confirmación al cliente.</li>
+  <li>Agrega <strong>repartidores</strong> y <strong>plataformas</strong>, toca <span class="ui">Guardar reparto</span> y luego <span class="ui">Probar cálculo de rutas</span>.</li>
+  <li>En <strong>Este celular</strong> elige “Solo cocina” para la tableta de cocina o “Solo reparto” para el celular del repartidor.</li>
+</ol>
+</section>
+
+<section id="problemas">
+<h2><span class="n">16</span>Problemas frecuentes</h2>
+<div class="table-wrap"><table>
+<tr><th>Qué pasa</th><th>Qué hacer</th></tr>
+<tr><td>Arriba dice “Reconectando…”</td><td>Revisa el internet del celular. Al volver la señal, la app se actualiza sola.</td></tr>
+<tr><td>“Este usuario no está dado de alta como personal”</td><td>El encargado debe agregar ese correo a la tabla <code>staff</code> en Supabase (ver README).</td></tr>
+<tr><td>No aparece la impresora</td><td>Revisa que esté encendida y en la misma red Wi-Fi. En iPhone debe ser compatible con AirPrint.</td></tr>
+<tr><td>El ticket sale cortado</td><td>Cambia el ancho de papel en Ajustes (58 u 80 mm).</td></tr>
+<tr><td>Dos personas editaron el mismo pedido</td><td>Se guarda el último cambio. Evita que dos celulares editen la misma mesa al mismo tiempo.</td></tr>
+<tr><td>No aparece “Mejoras para la app”</td><td>Falta ejecutar <code>supabase/migracion-1.1.sql</code> en Supabase.</td></tr>
+<tr><td>Los km dicen “(aprox.)” o “Probar cálculo de rutas” falla</td><td>La función <code>domicilio</code> no está activa o falta la clave <code>ORS_API_KEY</code> (README, paso 4).</td></tr>
+<tr><td>No se guardan los clientes frecuentes</td><td>Falta ejecutar <code>supabase/migracion-1.2.sql</code>.</td></tr>
+<tr><td>El enlace de WhatsApp no se lee</td><td>Marca el punto en el mapa. Pide al cliente “ubicación actual”, no “en tiempo real”.</td></tr>
+</table></div>
+</section>
+
+<footer>BubaManía · Manual de la versión 1.2.0 · Las imágenes usan datos de ejemplo.</footer>
+</main>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Menú · BubaManía</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#7A4FD0">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js"></script>
+<style>
+:root{--bg:#F3EEFB;--surface:#fff;--ink:#2B1745;--muted:#6E5C86;--taro:#7A4FD0;--taro-soft:#DCCDF7;--pink:#F2507F;--line:#D9CEEB;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1A1026;--surface:#261838;--ink:#F3ECFF;--muted:#B7A6D1;--taro:#A383F0;--taro-soft:#3E2A5E;--pink:#FF6E97;--line:#3E2D57}}
+:root[data-theme="dark"]{--bg:#1A1026;--surface:#261838;--ink:#F3ECFF;--muted:#B7A6D1;--taro:#A383F0;--taro-soft:#3E2A5E;--pink:#FF6E97;--line:#3E2D57}
+*,*::before,*::after{box-sizing:inherit}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45}
+h1,h2{font-family:"Fredoka","DM Sans",system-ui,sans-serif;font-weight:600;margin:0}
+main{max-width:640px;margin:0 auto;padding:22px 16px 48px}
+.logo{display:flex;gap:4px;align-items:flex-end;margin-bottom:6px}
+.logo i{display:block;width:12px;height:12px;border-radius:50%;background:var(--ink)}
+.logo i:nth-child(2){width:16px;height:16px;background:var(--taro)}.logo i:nth-child(3){background:var(--pink)}
+h1{font-size:40px;font-weight:700;line-height:1.05}
+.cats{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:12px 0;margin:8px 0 0;z-index:2}
+.cats a{flex:none;text-decoration:none;color:var(--ink);background:var(--taro-soft);padding:7px 14px;border-radius:999px;font-weight:700;font-size:14px}
+h2{font-size:26px;margin:22px 0 6px;scroll-margin-top:70px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1.5px dashed var(--line)}
+.item img{width:76px;height:76px;object-fit:cover;border-radius:16px;display:block}
+.item .n{font-weight:700;font-size:17px}.item .d{font-size:14px;color:var(--muted)}
+.item .p{font-family:Fredoka,sans-serif;font-weight:600;font-size:19px}
+.item.off{opacity:.45}
+.gallery img{width:100%;border-radius:16px;margin-top:14px}
+.pdf{display:inline-block;margin-top:16px;background:var(--taro);color:#fff;text-decoration:none;padding:11px 18px;border-radius:999px;font-weight:700}
+.muted{color:var(--muted)}
+</style>
+</head>
+<body>
+<main>
+  <div class="logo" aria-hidden="true"><i></i><i></i><i></i></div>
+  <h1 id="biz">BubaManía</h1>
+  <p class="muted" id="sub">Cargando menú…</p>
+  <nav class="cats" id="cats" aria-label="Categorías"></nav>
+  <div id="menu"></div>
+  <div class="gallery" id="gal"></div>
+  <div id="pdf"></div>
+</main>
+<script>
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"}).format(Number(n)||0);
+const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-");
+(async()=>{
+  const C=window.BUBA_CONFIG||{};
+  if(!window.supabase||!C.url||C.url.includes("TU-PROYECTO")){ document.getElementById("sub").textContent="Menú no disponible por el momento."; return; }
+  const sb=window.supabase.createClient(C.url,C.anonKey);
+  const [m,c]=await Promise.all([sb.from("menu").select("id,data"), sb.from("config").select("data").eq("id",1).maybeSingle()]);
+  if(m.error){ document.getElementById("sub").textContent="No se pudo cargar el menú. Intenta de nuevo en un momento."; return; }
+  const cfg=(c.data&&c.data.data)||{};
+  const biz=cfg.negocio||"BubaManía";
+  document.getElementById("biz").textContent=biz; document.title="Menú · "+biz;
+  document.getElementById("sub").textContent=cfg.direccion||"Nuestro menú";
+  const ps=m.data.map(r=>Object.assign({id:r.id},r.data)).sort((a,b)=>(a.orden??0)-(b.orden??0)||String(a.nombre).localeCompare(b.nombre));
+  const cats=[...new Set([...(cfg.categorias||[]),...ps.map(p=>p.cat)])].filter(ct=>ps.some(p=>p.cat===ct));
+  document.getElementById("cats").innerHTML=cats.map(ct=>`<a href="#${slug(ct)}">${esc(ct)}</a>`).join("");
+  document.getElementById("menu").innerHTML=cats.map(ct=>`<h2 id="${slug(ct)}">${esc(ct)}</h2>`+ps.filter(p=>p.cat===ct).map(p=>`
+    <div class="item ${p.activo===false?"off":""}">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy">`:"<span></span>"}
+      <div><div class="n">${esc(p.nombre)}</div>${p.desc?`<div class="d">${esc(p.desc)}</div>`:""}${p.activo===false?`<div class="d">Agotado por hoy</div>`:""}</div>
+      <div class="p">${money(p.precio)}</div></div>`).join("")).join("") || `<p class="muted">Pronto publicaremos nuestro menú.</p>`;
+  document.getElementById("gal").innerHTML=(cfg.menuFotos||[]).filter(f=>/^https?:/.test(f)).map(f=>`<img src="${esc(f)}" alt="Menú impreso" loading="lazy">`).join("");
+  if(cfg.menuPdf&&/^https?:/.test(cfg.menuPdf)) document.getElementById("pdf").innerHTML=`<a class="pdf" href="${esc(cfg.menuPdf)}" target="_blank" rel="noopener">Ver menú en PDF</a>`;
+})();
+</script>
+</body>
+</html>
