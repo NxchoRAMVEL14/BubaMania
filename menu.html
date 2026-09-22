@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Menú · BubaManía</title>
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png">
 <meta name="theme-color" content="#7A4FD0">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -35,17 +35,21 @@ h2{font-size:26px;margin:22px 0 6px;scroll-margin-top:70px}
 .gallery img{width:100%;border-radius:16px;margin-top:14px}
 .pdf{display:inline-block;margin-top:16px;background:var(--taro);color:#fff;text-decoration:none;padding:11px 18px;border-radius:999px;font-weight:700}
 .muted{color:var(--muted)}
+.top{display:flex;gap:14px;align-items:center}
+.mlogo{width:96px;height:96px;border-radius:50%;object-fit:cover;flex:none;border:3px solid var(--surface);box-shadow:0 2px 0 rgba(43,23,69,.15)}
+@media (max-width:360px){.mlogo{width:76px;height:76px}}
 </style>
 </head>
 <body>
 <main>
-  <div class="logo" aria-hidden="true"><i></i><i></i><i></i></div>
-  <h1 id="biz">BubaManía</h1>
-  <p class="muted" id="sub">Cargando menú…</p>
+  <div class="top"><img src="logo.jpg" alt="Logotipo de BubaManía" class="mlogo"><div><h1 id="biz">BubaManía</h1><p class="muted" id="sub" style="margin:4px 0 0">Cargando menú…</p></div></div>
   <nav class="cats" id="cats" aria-label="Categorías"></nav>
   <div id="menu"></div>
   <div class="gallery" id="gal"></div>
   <div id="pdf"></div>
+  <footer class="muted" style="margin-top:36px;font-size:14px;text-align:center">
+    Usamos tus datos solo para atender tu pedido. <a href="aviso-privacidad.html" style="color:var(--taro)">Aviso de privacidad</a>
+  </footer>
 </main>
 <script>
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));

@@ -1,12 +1,14 @@
-# BubaManía · versión 1.2.0
+# BubaManía · versión 1.3.0
 
 App de pedidos (en local, para llevar y a domicilio), cuentas por persona, meseros, propinas, reparto, cocina, caja, menú con QR y tickets.
 
 - `index.html`: app del personal (requiere usuario y contraseña).
+- `aviso-privacidad.html`: aviso de privacidad público (se enlaza desde el menú, el ticket y WhatsApp).
+- `logo.jpg`, `favicon.png`, `icon-192.png`, `icon-512.png`: logotipo e íconos.
 - `menu.html`: menú público para clientes (el QR apunta aquí).
 - `config.js`: aquí van la URL y la clave pública de Supabase.
 - `supabase/schema.sql`: base de datos completa (instalación nueva).
-- `supabase/migracion-1.1.sql` y `migracion-1.2.sql`: solo para actualizar instalaciones anteriores.
+- `supabase/migracion-1.1.sql`, `1.2` y `1.3`: solo para actualizar instalaciones anteriores.
 - `supabase/functions/domicilio/index.ts`: función que calcula km, tiempo y busca direcciones.
 - `manual.html` y carpeta `manual/`: manual de uso con imágenes (se abre desde la app).
 - `manual/manual.pdf`: el mismo manual para imprimir o mandar por WhatsApp.
@@ -68,6 +70,12 @@ La clave pública puede estar visible en GitHub; la seguridad la dan las reglas 
 - Configura el ancho de papel (58 u 80 mm) y prueba con **Imprimir ticket de prueba**.
 - La impresora debe aparecer en el diálogo de impresión del celular (AirPrint en iPhone; servicio de impresión en Android).
 
+## ¿Ya tenías la versión 1.2?
+
+1. En Supabase ejecuta `supabase/migracion-1.3.sql` (borrado de datos de clientes y conservación).
+2. En GitHub sube y reemplaza todos los archivos de la carpeta, incluidos `aviso-privacidad.html`, `logo.jpg`, `favicon.png`, los íconos y la carpeta `manual/`.
+3. En la app, ve a Ajustes → Privacidad de clientes e imprime el letrero de la cámara.
+
 ## ¿Ya tenías la versión 1.1?
 
 1. En Supabase ejecuta `supabase/migracion-1.2.sql` (tabla de clientes frecuentes).
@@ -92,10 +100,20 @@ Edita o vuelve a subir `index.html` o `menu.html` en GitHub. Los productos, prec
 - Necesita internet; no funciona sin conexión.
 - La app no lee WhatsApp automáticamente: el enlace de ubicación se copia y pega.
 - OpenRouteService no considera el tráfico en tiempo real; el tiempo es estimado.
-- Teléfonos y direcciones de clientes son datos personales: ten a la vista un aviso de privacidad.
+- El aviso de privacidad es una base redactada conforme a la ley; conviene que lo revise un abogado antes de publicarlo.
+- El plazo de conservación (12 meses) está escrito en el aviso: si lo cambias en la app, actualiza también el aviso.
 - En el plan gratuito de Supabase, los proyectos sin actividad por un tiempo pueden pausarse. Revisa las condiciones vigentes en supabase.com/pricing.
 
 ## Historial de versiones
+
+**1.3.0**
+- Aviso de privacidad integral (`aviso-privacidad.html`) conforme a la LFPDPPP de 2025, con resumen al inicio.
+- Aviso enlazado en menú público, pantalla de entrada, ticket y mensaje de confirmación por WhatsApp.
+- Consentimiento de promociones por WhatsApp por cliente, guion para llamadas y lista de teléfonos que aceptan.
+- Ajustes → Privacidad: buscar, enviar, corregir o borrar los datos de un cliente (derechos ARCO).
+- Borrado automático diario: clientes sin pedidos en 12 meses y anonimización de pedidos antiguos.
+- Letrero de videovigilancia imprimible con QR al aviso.
+- Logotipo de BubaManía en la app, el menú, el manual e íconos.
 
 **1.2.0**
 - Nuevo pedido con tipo (En local, Para llevar, Domicilio) y origen (Presencial, Llamada, WhatsApp, Plataforma).

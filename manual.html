@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Manual de uso · BubaManía</title>
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
@@ -58,9 +58,9 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 </head>
 <body>
 <main>
-<div class="logo" aria-hidden="true"><i></i><i></i><i></i></div>
+<img src="logo.jpg" alt="Logotipo de BubaManía" style="width:120px;height:120px;border-radius:50%;object-fit:cover;display:block">
 <h1>Manual de uso</h1>
-<p class="lead">BubaManía · versión 1.2.0 · para caja, meseros y cocina · <a href="manual/manual.pdf">Descargar PDF</a></p>
+<p class="lead">BubaManía · versión 1.3.0 · para caja, meseros y cocina · <a href="manual/manual.pdf">Descargar PDF</a></p>
 
 <nav class="toc" aria-label="Contenido"><strong>Contenido</strong>
 <ol>
@@ -79,6 +79,7 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
   <li><a href="#domicilio">Pedidos a domicilio</a></li>
   <li><a href="#reparto">Pantalla de reparto</a></li>
   <li><a href="#config-reparto">Configurar el reparto</a></li>
+  <li><a href="#privacidad">Privacidad de datos</a></li>
   <li><a href="#problemas">Problemas frecuentes</a></li>
 </ol></nav>
 
@@ -299,8 +300,41 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 </ol>
 </section>
 
+<section id="privacidad">
+<h2><span class="n">16</span>Privacidad de datos</h2>
+<p>BubaManía tiene un <a href="aviso-privacidad.html">aviso de privacidad</a> público. Se enlaza desde el menú del QR, la pantalla de entrada, el ticket y los mensajes de WhatsApp. Esto es lo que le toca hacer al personal:</p>
+<div class="pair">
+<figure><img src="manual/33-entrega-llamada.png" alt="Guion para llamadas en datos de entrega"><figcaption>En pedidos por llamada aparece el texto que hay que leer al cliente.</figcaption></figure>
+<figure><img src="manual/34-aviso.png" alt="Aviso de privacidad"><figcaption>Aviso de privacidad completo, con el resumen al inicio.</figcaption></figure>
+</div>
+<h3>Al tomar un pedido</h3>
+<ol class="steps">
+  <li><strong>Por llamada:</strong> lee el texto amarillo que aparece en Datos de entrega y anota si acepta promociones.</li>
+  <li><strong>Por WhatsApp:</strong> el mensaje de confirmación ya incluye el enlace al aviso y, si no se ha preguntado, la pregunta de promociones. Cuando el cliente responda, marca su respuesta en <span class="ui">Editar entrega</span>.</li>
+  <li><strong>Promociones:</strong> solo se mandan a clientes marcados como <span class="ui">Sí acepta</span>. Si alguien responde BAJA, búscalo en Ajustes y toca <span class="ui">Quitar promociones</span>.</li>
+</ol>
+<h3>Cuando un cliente pide ver, corregir o borrar sus datos</h3>
+<figure><img src="manual/31-privacidad.png" alt="Sección de privacidad en Ajustes" class="wide"><figcaption>Ajustes → Privacidad de clientes.</figcaption></figure>
+<ol class="steps">
+  <li>Confirma que te escribe desde el mismo número con el que pide, o pídele una identificación.</li>
+  <li>Escribe su teléfono y toca <span class="ui">Buscar</span>.</li>
+  <li><strong>Ver:</strong> toca <span class="ui">Enviarle sus datos</span> y se abre WhatsApp con el resumen.</li>
+  <li><strong>Corregir:</strong> toca <span class="ui">Corregir</span> y cambia lo necesario.</li>
+  <li><strong>Borrar:</strong> toca <span class="ui">Borrar todos sus datos</span>. Se elimina su registro y se quitan su nombre, teléfono y dirección de todos sus pedidos; las ventas no cambian. Al final, la app ofrece mandarle la confirmación.</li>
+</ol>
+<h3>Borrado automático</h3>
+<p>Una vez al día la app borra a los clientes que llevan 12 meses sin pedir y quita los datos personales de los pedidos más antiguos. No tienes que hacer nada; con <span class="ui">Revisar ahora</span> lo ejecutas en el momento.</p>
+<h3>Letrero de la cámara</h3>
+<div class="pair">
+<figure><img src="manual/32-letrero.png" alt="Letrero de videovigilancia" class="wide"><figcaption>Letrero listo para imprimir, con el código QR al aviso.</figcaption></figure>
+<div><p>En Ajustes toca <span class="ui">Imprimir letrero de cámara</span> y colócalo en un lugar visible a la entrada del local. El QR lleva al aviso de privacidad.</p>
+<p>Usa también <span class="ui">Copiar aviso corto</span> si quieres pegarlo en tu perfil de WhatsApp Business o en redes sociales.</p></div>
+</div>
+<div class="tip warn">Si cambias el plazo de conservación, agregas una finalidad nueva o empiezas a pedir otros datos, el aviso debe actualizarse antes. Anótalo en “Mejoras para la app”.</div>
+</section>
+
 <section id="problemas">
-<h2><span class="n">16</span>Problemas frecuentes</h2>
+<h2><span class="n">17</span>Problemas frecuentes</h2>
 <div class="table-wrap"><table>
 <tr><th>Qué pasa</th><th>Qué hacer</th></tr>
 <tr><td>Arriba dice “Reconectando…”</td><td>Revisa el internet del celular. Al volver la señal, la app se actualiza sola.</td></tr>
@@ -310,12 +344,13 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 <tr><td>Dos personas editaron el mismo pedido</td><td>Se guarda el último cambio. Evita que dos celulares editen la misma mesa al mismo tiempo.</td></tr>
 <tr><td>No aparece “Mejoras para la app”</td><td>Falta ejecutar <code>supabase/migracion-1.1.sql</code> en Supabase.</td></tr>
 <tr><td>Los km dicen “(aprox.)” o “Probar cálculo de rutas” falla</td><td>La función <code>domicilio</code> no está activa o falta la clave <code>ORS_API_KEY</code> (README, paso 4).</td></tr>
+<tr><td>“No se pudo revisar” o “No se pudo borrar” en Privacidad</td><td>Falta ejecutar <code>supabase/migracion-1.3.sql</code>.</td></tr>
 <tr><td>No se guardan los clientes frecuentes</td><td>Falta ejecutar <code>supabase/migracion-1.2.sql</code>.</td></tr>
 <tr><td>El enlace de WhatsApp no se lee</td><td>Marca el punto en el mapa. Pide al cliente “ubicación actual”, no “en tiempo real”.</td></tr>
 </table></div>
 </section>
 
-<footer>BubaManía · Manual de la versión 1.2.0 · Las imágenes usan datos de ejemplo.</footer>
+<footer>BubaManía · Manual de la versión 1.3.0 · Las imágenes usan datos de ejemplo.</footer>
 </main>
 </body>
 </html>

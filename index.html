@@ -8,7 +8,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="manifest" href="manifest.webmanifest">
-<link rel="icon" href="icon.svg" type="image/svg+xml">
+<link rel="icon" href="favicon.png" type="image/png">
 <link rel="apple-touch-icon" href="icon-192.png">
 <meta name="theme-color" content="#7A4FD0">
 <meta name="apple-mobile-web-app-capable" content="yes">
@@ -179,6 +179,10 @@ td,th{padding:6px 4px;text-align:left;border-bottom:1px solid var(--line);font-s
 .tip{background:var(--surface);border-left:5px solid var(--mango);border-radius:12px;padding:8px 12px;margin:0 0 12px;font-size:14px}
 .tip.warn{border-left-color:var(--pink)}
 .leaflet-container{font:inherit}
+.hlogo{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:none}
+.llogo{width:110px;height:110px;border-radius:50%;object-fit:cover;display:block;margin:0 auto 4px;border:3px solid var(--surface);box-shadow:0 2px 0 rgba(43,23,69,.15)}
+#login h1{text-align:center}
+.ptext{background:var(--surface2);border-radius:12px;padding:10px 12px;font-size:14px;white-space:pre-wrap;margin:6px 0}
 /* Login */
 #login{min-height:100vh;display:grid;place-items:center;padding:24px}
 #login .box{width:100%;max-width:380px;background:var(--surface);border:1.5px solid var(--line);border-radius:24px;padding:24px}
@@ -206,19 +210,19 @@ body:not(.locked) #login{display:none}
 <body class="locked">
 <section id="login" aria-label="Iniciar sesión">
   <div class="box">
-    <div class="logo"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span></div>
+    <img src="logo.jpg" alt="Logotipo de BubaManía" class="llogo">
     <h1>BubaManía</h1>
     <p class="muted" style="margin-top:0">Entra con el usuario del personal.</p>
     <div class="field"><label for="lu">Correo</label><input id="lu" type="email" autocomplete="username" inputmode="email"></div>
     <div class="field"><label for="lp">Contraseña</label><input id="lp" type="password" autocomplete="current-password"></div>
     <button class="btn primary block" id="lb">Entrar</button>
     <p class="muted" id="lmsg" style="font-size:14px;min-height:1.4em"></p>
-    <p style="font-size:14px"><a href="menu.html">Ver menú para clientes</a> · <a href="manual.html">Manual de uso</a></p>
+    <p style="font-size:14px"><a href="menu.html">Ver menú para clientes</a> · <a href="manual.html">Manual de uso</a> · <a href="aviso-privacidad.html">Aviso de privacidad</a></p>
     <p class="muted" style="font-size:12.5px;margin:0" id="lver"></p>
   </div>
 </section>
 <header class="top">
-  <div class="logo"><span class="dots" aria-hidden="true"><i></i><i></i><i></i></span><h1 id="bizName">BubaManía</h1></div>
+  <div class="logo"><img src="logo.jpg" alt="" class="hlogo"><h1 id="bizName">BubaManía</h1></div>
   <div class="sync" id="sync"><b></b><span>Conectando…</span></div>
 </header>
 
@@ -238,7 +242,7 @@ body:not(.locked) #login{display:none}
 <div id="print"></div>
 
 <script>
-const APP_VERSION = "1.2.0";
+const APP_VERSION = "1.3.0";
 /* ---------- Utilidades ---------- */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -656,7 +660,8 @@ function printTicket(o, ids, withEnv){
     ${showEnv?`<div class="r"><span>Envío${e&&e.km?` (${e.km.toFixed(1)} km)`:""}</span><span>${envAmt?money(envAmt):"Gratis"}</span></div>`:""}
     <div class="r big"><span>TOTAL</span><span>${money(total+tips+envAmt)}</span></div>
     ${e&&e.pago==="contraentrega"&&Number(e.pagaCon)&&!people.every(p=>p.pago)?`<div class="r"><span>Paga con</span><span>${money(e.pagaCon)}</span></div><div class="r b"><span>Cambio a llevar</span><span>${money(Math.max(0,Number(e.pagaCon)-(total+envAmt)))}</span></div>`:""}<hr>
-    <div class="c">${esc(c.pie)}</div><div class="c">&nbsp;</div></div>`;
+    <div class="c">${esc(c.pie)}</div>
+    <div class="c" style="font-size:10px;margin-top:4px">Aviso de privacidad: ${esc(avisoUrl().replace(/^https?:\/\//,""))}</div><div class="c">&nbsp;</div></div>`;
   setTimeout(()=>{ try{ window.print(); } catch(e){ toast("La impresión no está disponible aquí. Usa WhatsApp."); } }, 60);
 }
 function ticketText(o){
@@ -812,6 +817,12 @@ function waiterBreakdown(list, pays, propinas, day){
   return {html, rows, defaultPool, modoTxt};
 }
 
+/* ---------- Privacidad ---------- */
+const PRIV = { responsable:"Joaquín Hermes Hill Ramírez", whatsapp:"524761134044", whatsappTxt:"476 113 4044", vigencia:"13 de septiembre de 2026" };
+function avisoUrl(){ return new URL("aviso-privacidad.html", location.href).href; }
+function avisoCorto(){ return `Aviso de privacidad: ${cfg().negocio} (responsable: ${PRIV.responsable}) usa tu nombre, teléfono y dirección para preparar, entregar y cobrar tu pedido. Con tu permiso te enviaremos promociones por WhatsApp; puedes negarte cuando quieras respondiendo BAJA. Aviso completo: ${avisoUrl()}`; }
+function guionLlamada(){ return `“Para tu pedido usaremos tu nombre, teléfono y dirección solo para prepararlo, entregarlo y cobrarlo. ¿Te gustaría recibir promociones por WhatsApp? Puedes darte de baja cuando quieras. Nuestro aviso de privacidad completo está en el menú en línea o te lo mando por WhatsApp.”`; }
+
 /* ---------- Domicilio y reparto ---------- */
 const TIPOS_PED=[["local","En local"],["llevar","Para llevar"],["domicilio","Domicilio"]];
 const ORIGENES=[["presencial","Presencial"],["llamada","Llamada"],["whatsapp","WhatsApp"],["plataforma","Plataforma"]];
@@ -860,7 +871,8 @@ async function ubicar(texto){
 function pinIcon(color, txt){ return L.divIcon({className:"", html:`<div class="pin" style="background:${color}"><span>${txt||""}</span></div>`, iconSize:[30,30], iconAnchor:[15,30]}); }
 function pendienteCobro(o){ return o.comensales.filter(p=>!p.pago).reduce((s,p)=>s+personTotal(p),0) + (envioPend(o)?envioCosto(o):0); }
 function confirmMsg(o){ const c=cfg(), e=o.entrega||{}; const eta=(Number(c.prepMin)||15)+(e.min||0);
-  return `Hola ${e.cliente||""}, recibimos tu pedido en ${c.negocio} 🧋\nTotal: ${money(orderTotal(o))}${envioCosto(o)?` (incluye envío de ${money(envioCosto(o))})`:" (envío gratis)"}.\nTiempo estimado de entrega: ~${eta} min.`; }
+  const promo = e.promos===undefined || e.promos===null ? `\n\n¿Te gustaría recibir promociones por WhatsApp? Responde SÍ o NO.` : (e.promos ? `\n\nPara dejar de recibir promociones responde BAJA.` : "");
+  return `Hola ${e.cliente||""}, recibimos tu pedido en ${c.negocio} 🧋\nTotal: ${money(orderTotal(o))}${envioCosto(o)?` (incluye envío de ${money(envioCosto(o))})`:" (envío gratis)"}.\nTiempo estimado de entrega: ~${eta} min.${promo}\n\nUsamos tus datos solo para tu pedido. Aviso de privacidad: ${avisoUrl()}`; }
 function caminoMsg(o){ const e=o.entrega||{}; return `Hola ${e.cliente||""}, tu pedido de ${cfg().negocio} ya va en camino 🛵 Llega en ~${e.min||15} min.${e.pago==="contraentrega"?` Total a pagar: ${money(pendienteCobro(o))}.`:""}`; }
 async function buscarCliente(tel){
   if(tel.length!==10 || !Store.clientesOk) return null;
@@ -886,6 +898,7 @@ function deliveryForm(id){
   modal(`<h3>Datos de entrega</h3>
     ${!c.local?`<div class="tip warn">Configura la ubicación del local en Ajustes → Reparto para calcular km y tiempo.</div>`:""}
     ${!Store.clientesOk?`<div class="tip">Para guardar clientes frecuentes ejecuta <strong>migracion-1.2.sql</strong> en Supabase.</div>`:""}
+    ${o.origen==="llamada"?`<div class="tip"><strong>Lee al cliente:</strong> ${esc(guionLlamada())}</div>`:""}
     <div class="field"><label for="dtel">Teléfono del cliente</label><input id="dtel" type="tel" inputmode="tel" autocomplete="off" value="${esc(e.telefono)}" placeholder="10 dígitos"><p class="muted" id="dfreq" style="margin:4px 0 0;font-size:13.5px"></p></div>
     <div class="field"><label for="dnom">Nombre</label><input id="dnom" autocomplete="off" value="${esc(e.cliente)}"></div>
     <div class="field"><label for="dubi">Ubicación</label><textarea id="dubi" rows="2" placeholder="Pega el enlace de ubicación de WhatsApp o escribe la dirección">${esc(e.ubicacion)}</textarea>
@@ -897,6 +910,8 @@ function deliveryForm(id){
     <div class="field"><label for="denv">Costo de envío</label><input id="denv" type="number" inputmode="decimal" value="${e.costoEnvio||0}"><p class="muted" id="denvh" style="margin:4px 0 0;font-size:13px"></p></div>
     <div class="field"><label>Pago</label><div class="seg">${[["contraentrega","Paga al recibir"],["pagado","Ya pagó"],["plataforma","Por plataforma"]].map(([k,l])=>`<button data-dp="${k}" aria-pressed="${e.pago===k}">${l}</button>`).join("")}</div></div>
     <div class="field" id="dpcF"><label for="dpc">¿Con cuánto paga?</label><input id="dpc" type="number" inputmode="decimal" value="${esc(e.pagaCon)}" placeholder="Ej. 500"></div>
+    <div class="field"><label>¿Acepta promociones por WhatsApp?</label><div class="seg">${[["si","Sí acepta"],["no","No acepta"],["np","No se preguntó"]].map(([k,l])=>`<button data-pr="${k}" aria-pressed="${(e.promos===true?"si":e.promos===false?"no":"np")===k}">${l}</button>`).join("")}</div>
+      <p class="muted" style="margin:4px 0 0;font-size:13px">Si no se preguntó, el mensaje de WhatsApp se lo pregunta.</p></div>
     <div class="field"><label for="drep">Repartidor</label><select id="drep"><option value="">Sin asignar</option>${reps.map(r=>`<option ${r===e.repartidor?"selected":""}>${esc(r)}</option>`).join("")}</select></div>
     <button class="btn primary block" id="dsave">Guardar entrega</button>`, m=>{
     let map=null, destM=null;
@@ -924,6 +939,7 @@ function deliveryForm(id){
     const lookup=async()=>{ const d=onlyDigits(tel.value).slice(-10); const cl=await buscarCliente(d);
       if(cl){ $("#dfreq",m).textContent=`Cliente frecuente · ${cl.pedidos||1} pedido(s)`;
         if(!$("#dnom",m).value) $("#dnom",m).value=cl.nombre||""; if(!$("#dubi",m).value) $("#dubi",m).value=cl.ubicacion||""; if(!$("#dref",m).value) $("#dref",m).value=cl.referencias||"";
+        if(cl.promos && typeof cl.promos.acepta==="boolean" && e.promos==null){ e.promos=cl.promos.acepta; const k=cl.promos.acepta?"si":"no"; m.querySelectorAll("[data-pr]").forEach(x=>x.setAttribute("aria-pressed",x.dataset.pr===k)); promos=k; }
         if(e.lat==null && cl.lat!=null) setDest({lat:cl.lat,lng:cl.lng}); }
       else $("#dfreq",m).textContent = d.length===10 ? "Cliente nuevo" : ""; };
     tel.oninput=lookup; if(e.telefono) lookup();
@@ -933,16 +949,19 @@ function deliveryForm(id){
       b.disabled=false; b.textContent="Ubicar y calcular"; };
     $("#denv",m).oninput=()=>{ e.envioManual=true; showRes(); };
     let pago=e.pago; const updP=()=>$("#dpcF",m).classList.toggle("hidden", pago!=="contraentrega"); updP();
+    let promos = e.promos===true ? "si" : e.promos===false ? "no" : "np";
+    m.querySelectorAll("[data-pr]").forEach(b=>b.onclick=()=>{ promos=b.dataset.pr; m.querySelectorAll("[data-pr]").forEach(x=>x.setAttribute("aria-pressed",x===b)); });
     m.querySelectorAll("[data-dp]").forEach(b=>b.onclick=()=>{ pago=b.dataset.dp; m.querySelectorAll("[data-dp]").forEach(x=>x.setAttribute("aria-pressed",x===b)); updP(); });
     $("#dsave",m).onclick=()=>{
       const telefono=onlyDigits(tel.value).slice(-10), cliente=$("#dnom",m).value.trim();
-      const ent=Object.assign({}, e, {telefono, cliente, ubicacion:$("#dubi",m).value.trim(), referencias:$("#dref",m).value.trim(), costoEnvio:Number($("#denv",m).value)||0, pago, pagaCon:$("#dpc",m).value, repartidor:$("#drep",m).value});
+      const ent=Object.assign({}, e, {telefono, cliente, ubicacion:$("#dubi",m).value.trim(), referencias:$("#dref",m).value.trim(), costoEnvio:Number($("#denv",m).value)||0, pago, pagaCon:$("#dpc",m).value, repartidor:$("#drep",m).value, promos: promos==="si"?true:promos==="no"?false:null});
       const cur=clone(Store.data.pedidos[id]); const first=!cur.entrega; cur.entrega=ent;
       if(cliente && (!cur.nombre || cur.nombre==="Domicilio")) cur.nombre=cliente;
       if(cliente && cur.comensales[0] && /^(Persona \d+|Cliente)$/.test(cur.comensales[0].nombre)) cur.comensales[0].nombre=cliente;
       Store.save("pedidos", id, cur);
       if(telefono.length===10 && Store.clientesOk){ const prev=Store.data.clientes[telefono]||{};
-        Store.save("clientes", telefono, Object.assign({}, prev, {telefono, nombre:cliente||prev.nombre||"", ubicacion:ent.ubicacion, referencias:ent.referencias, lat:ent.lat, lng:ent.lng, pedidos:(prev.pedidos||0)+(first?1:0), ultimo:Date.now()})); }
+        Store.save("clientes", telefono, Object.assign({}, prev, {telefono, nombre:cliente||prev.nombre||"", ubicacion:ent.ubicacion, referencias:ent.referencias, lat:ent.lat, lng:ent.lng, pedidos:(prev.pedidos||0)+(first?1:0), ultimo:Date.now(),
+          promos: ent.promos===null ? (prev.promos||null) : {acepta:ent.promos, fecha:(prev.promos&&prev.promos.acepta===ent.promos&&prev.promos.fecha)||Date.now(), medio:o.origen||""}})); }
       closeModal(); toast("Entrega guardada");
     };
   });
@@ -1072,6 +1091,112 @@ function applyMode(){ const allowed=MODOS[deviceMode()]||MODOS.completo;
   if(!allowed.includes(UI.tab)) UI.tab=allowed[0];
   document.querySelectorAll("nav.tabs button").forEach(b=>{ b.hidden=!allowed.includes(b.dataset.tab); if(b.dataset.tab===UI.tab) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); }); }
 
+/* ---------- Privacidad: ajustes, ARCO y limpieza ---------- */
+function privacidadCard(c){
+  const meses=Number(c.conservacionMeses)||12; const pv=UI.pv;
+  const last=(()=>{ try { return localStorage.getItem("buba-limpieza-fecha")||""; } catch(e){ return ""; } })();
+  let res="";
+  if(pv){
+    if(pv.error) res=`<p class="muted">${esc(pv.error)}</p>`;
+    else if(!pv.cliente && !pv.pedidos) res=`<p class="muted">No hay datos guardados con el teléfono ${esc(pv.tel)}.</p>`;
+    else { const cl=pv.cliente||{}; const pr=cl.promos&&typeof cl.promos.acepta==="boolean"?(cl.promos.acepta?"Sí acepta":"No acepta"):"No se preguntó";
+      res=`<div class="ptext"><strong>${esc(cl.nombre||"Sin nombre")}</strong> · ${esc(pv.tel)}
+Dirección: ${esc(cl.ubicacion||"—")}
+Referencias: ${esc(cl.referencias||"—")}
+Ubicación en mapa: ${cl.lat!=null?"guardada":"no"}
+Promociones: ${pr}
+Pedidos con este teléfono: ${pv.pedidos}
+Último pedido: ${cl.ultimo?new Date(cl.ultimo).toLocaleDateString("es-MX"):"—"}</div>
+      <div class="row">
+        <a class="btn sm ghost" href="${waLink(pv.tel, `Hola ${cl.nombre||""}, estos son los datos que ${cfg().negocio} tiene guardados de ti:\n${privResumen(pv)}\n\nSi quieres corregir o borrar algo, responde a este mensaje. Aviso de privacidad: ${avisoUrl()}`)}" target="_blank" rel="noopener">Enviarle sus datos</a>
+        ${pv.cliente?`<button class="btn sm ghost" id="pvEdit">Corregir</button><button class="btn sm ghost" id="pvPromoTgl">${cl.promos&&cl.promos.acepta?"Quitar promociones":"Marcar que acepta promociones"}</button>`:""}
+        <button class="btn sm pink" id="pvDel">Borrar todos sus datos</button>
+      </div>`; }
+  }
+  return `<div class="card" id="privCard"><h3 style="font-size:19px">Privacidad de clientes</h3>
+    <p class="muted" style="margin-top:4px">Responsable: ${esc(PRIV.responsable)} · Aviso vigente desde el ${esc(PRIV.vigencia)}.</p>
+    <div class="row"><a class="btn sm ghost" href="aviso-privacidad.html" target="_blank" rel="noopener">Ver aviso completo</a><button class="btn sm ghost" id="pvCopy">Copiar aviso corto</button><button class="btn sm ghost" id="pvGuion">Copiar guion para llamadas</button><button class="btn sm ghost" id="pvLetrero">Imprimir letrero de cámara</button></div>
+    <h3 style="font-size:17px;margin-top:16px">Solicitudes de clientes (ver, corregir o borrar)</h3>
+    <div class="row" style="flex-wrap:nowrap"><input id="pvTel" type="tel" inputmode="tel" placeholder="Teléfono a 10 dígitos" value="${esc(pv&&pv.tel||"")}"><button class="btn primary" id="pvFind">Buscar</button></div>
+    <div style="margin-top:8px">${res}</div>
+    <h3 style="font-size:17px;margin-top:16px">Borrado automático</h3>
+    <p class="muted" style="margin:4px 0 8px">Se borran los clientes sin pedidos en este tiempo, y en pedidos más antiguos se quitan nombre, teléfono y dirección. Se revisa una vez al día.${last?` Última revisión en este celular: ${esc(last)}.`:""}</p>
+    <div class="seg">${[6,12,24].map(n=>`<button data-cons="${n}" aria-pressed="${meses===n}">${n} meses</button>`).join("")}</div>
+    <p class="muted" style="font-size:13px">El aviso publicado dice 12 meses. Si cambias el plazo, avísame para actualizar el aviso.</p>
+    <button class="btn ghost sm" id="pvClean">Revisar ahora</button>
+    <h3 style="font-size:17px;margin-top:16px">Promociones por WhatsApp</h3>
+    <p class="muted" style="margin:4px 0 8px">${UI.pvPromos?`${UI.pvPromos.length} cliente(s) aceptan recibir promociones.`:"Consultando…"}</p>
+    ${UI.pvPromos&&UI.pvPromos.length?`<button class="btn ghost sm" id="pvPromoCopy">Copiar teléfonos que aceptan</button>`:""}
+  </div>`;
+}
+function privResumen(pv){ const cl=pv.cliente||{}; return `Nombre: ${cl.nombre||"—"}\nTeléfono: ${pv.tel}\nDirección: ${cl.ubicacion||"—"}\nReferencias: ${cl.referencias||"—"}\nPromociones: ${cl.promos&&typeof cl.promos.acepta==="boolean"?(cl.promos.acepta?"sí":"no"):"sin respuesta"}\nPedidos registrados: ${pv.pedidos}`; }
+async function privBuscar(tel){
+  UI.pv={tel}; 
+  try {
+    const [c,p]=await Promise.all([ sb.from("clientes").select("data").eq("id",tel).maybeSingle(),
+      sb.from("pedidos").select("id",{count:"exact",head:true}).eq("data->entrega->>telefono",tel) ]);
+    if(c.error) throw c.error;
+    UI.pv={tel, cliente:c.data?c.data.data:null, pedidos:p.count||0};
+    if(UI.pv.cliente) Store.data.clientes[tel]=UI.pv.cliente;
+  } catch(e){ UI.pv={tel, error:"No se pudo consultar. Revisa que ejecutaste las migraciones 1.2 y 1.3 en Supabase."}; }
+  render();
+}
+async function privPromos(){
+  UI.pvPromosAt=Date.now();
+  try { const {data,error}=await sb.from("clientes").select("id,data").eq("data->promos->>acepta","true"); if(error) throw error; UI.pvPromos=data.map(r=>({tel:r.id, nombre:r.data.nombre||""})); }
+  catch(e){ UI.pvPromos=[]; }
+  if(UI.tab==="ajustes") render();
+}
+async function limpiarDatos(silencioso){
+  const meses=Number(cfg().conservacionMeses)||12;
+  try {
+    const {data,error}=await sb.rpc("limpiar_datos_personales",{meses});
+    if(error) throw error;
+    try { localStorage.setItem("buba-limpieza", today()); localStorage.setItem("buba-limpieza-fecha", new Date().toLocaleString("es-MX")); } catch(e){}
+    const n=(data&&data.clientes||0)+(data&&data.pedidos||0);
+    if(!silencioso || n) toast(n?`Privacidad: se borraron ${data.clientes} cliente(s) y se anonimizaron ${data.pedidos} pedido(s) antiguos`:"Todo en orden: no hay datos vencidos");
+    if(!silencioso && UI.tab==="ajustes") render();
+  } catch(e){ if(!silencioso) toast("No se pudo revisar. ¿Ejecutaste migracion-1.3.sql?"); }
+}
+function limpiezaDiaria(){ let last=""; try { last=localStorage.getItem("buba-limpieza")||""; } catch(e){} if(last!==today()) limpiarDatos(true); }
+function bindPrivacidad(){
+  if(!$("#privCard")) return;
+  if(!UI.pvPromosAt || Date.now()-UI.pvPromosAt>60000) privPromos();
+  $("#pvCopy").onclick=async()=>toast(await copyText(avisoCorto())?"Aviso corto copiado":"No se pudo copiar");
+  $("#pvGuion").onclick=async()=>toast(await copyText(guionLlamada().replace(/[“”]/g,""))?"Guion copiado":"No se pudo copiar");
+  $("#pvLetrero").onclick=()=>{
+    const box=document.createElement("div"); if(typeof QRCode!=="undefined") new QRCode(box,{text:avisoUrl(),width:260,height:260,colorDark:"#000000",colorLight:"#ffffff"});
+    setTimeout(()=>{ const q=box.querySelector("canvas"); const src=q?q.toDataURL():"";
+      $("#print").innerHTML=`<div style="font-family:Fredoka,'DM Sans',sans-serif;color:#000;text-align:center;padding:10mm;border:3px solid #000;border-radius:8mm;max-width:180mm;margin:0 auto">
+        <div style="font-size:40px;font-weight:700;letter-spacing:1px">ZONA VIDEOVIGILADA</div>
+        <div style="font-size:64px;line-height:1;margin:4mm 0">📹</div>
+        <div style="font-family:'DM Sans',sans-serif;font-size:17px;line-height:1.45;margin:0 auto 5mm;max-width:150mm">${esc(cfg().negocio)}, cuyo responsable es ${esc(PRIV.responsable)}, capta imágenes en este lugar únicamente para la seguridad de clientes, personal e instalaciones. Las imágenes no se publican ni se comparten, salvo requerimiento de autoridad.</div>
+        ${src?`<img src="${src}" style="width:55mm;height:55mm">`:""}
+        <div style="font-family:'DM Sans',sans-serif;font-size:14px;margin-top:3mm">Consulta el aviso de privacidad completo escaneando el código<br>o en ${esc(avisoUrl())}<br>Dudas: WhatsApp ${esc(PRIV.whatsappTxt)}</div></div>`;
+      setTimeout(()=>window.print(),80); },120); };
+  $("#pvFind").onclick=()=>{ const t=onlyDigits($("#pvTel").value).slice(-10); if(t.length!==10){ toast("Escribe el teléfono a 10 dígitos"); return; } delete $("#pvTel").dataset.dirty; privBuscar(t); };
+  $("#pvTel").onkeydown=e=>{ if(e.key==="Enter") $("#pvFind").click(); };
+  const ed=$("#pvEdit"); if(ed) ed.onclick=()=>{ const pv=UI.pv, cl=Object.assign({},pv.cliente);
+    modal(`<h3>Corregir datos</h3><div class="field"><label for="ce1">Nombre</label><input id="ce1" value="${esc(cl.nombre||"")}"></div>
+      <div class="field"><label for="ce2">Dirección</label><input id="ce2" value="${esc(cl.ubicacion||"")}"></div>
+      <div class="field"><label for="ce3">Referencias</label><input id="ce3" value="${esc(cl.referencias||"")}"></div>
+      <button class="btn primary block" id="ceS">Guardar corrección</button>`, m=>{
+      $("#ceS",m).onclick=()=>{ Object.assign(cl,{nombre:$("#ce1",m).value.trim(), ubicacion:$("#ce2",m).value.trim(), referencias:$("#ce3",m).value.trim(), corregido:Date.now()});
+        Store.save("clientes", pv.tel, cl); UI.pv=Object.assign({},pv,{cliente:cl}); closeModal(); toast("Datos corregidos"); render(); }; }); };
+  const pt=$("#pvPromoTgl"); if(pt) pt.onclick=()=>{ const pv=UI.pv; const cl=Object.assign({},pv.cliente); const acepta=!(cl.promos&&cl.promos.acepta);
+    cl.promos={acepta, fecha:Date.now(), medio:"solicitud"}; Store.save("clientes", pv.tel, cl); UI.pv=Object.assign({},pv,{cliente:cl}); UI.pvPromosAt=0; toast(acepta?"Marcado: acepta promociones":"Promociones desactivadas"); render(); };
+  const dl=$("#pvDel"); if(dl) dl.onclick=async()=>{ const tel=UI.pv.tel;
+    if(!confirm(`Se borrarán los datos del cliente ${tel} y se quitarán su nombre, teléfono y dirección de todos sus pedidos. Esto no se puede deshacer. ¿Continuar?`)) return;
+    try { const {data,error}=await sb.rpc("borrar_cliente",{tel}); if(error) throw error;
+      delete Store.data.clientes[tel]; UI.pv={tel, cliente:null, pedidos:0}; UI.pvPromosAt=0;
+      toast(`Listo: datos borrados (${data&&data.pedidos||0} pedido(s) anonimizados)`); await Store.load().catch(()=>{}); render();
+      if(confirm("¿Avisar al cliente por WhatsApp que sus datos fueron borrados?")) window.open(waLink(tel,`Hola, te confirmamos que ${cfg().negocio} borró tus datos personales (nombre, teléfono y dirección) de sus registros, como lo solicitaste. Gracias.`),"_blank");
+    } catch(e){ toast("No se pudo borrar. ¿Ejecutaste migracion-1.3.sql?"); } };
+  document.querySelectorAll("[data-cons]").forEach(b=>b.onclick=()=>{ Store.save("config","main",Object.assign(cfg(),{conservacionMeses:+b.dataset.cons})); toast("Plazo guardado"); });
+  $("#pvClean").onclick=()=>limpiarDatos(false);
+  const pc=$("#pvPromoCopy"); if(pc) pc.onclick=async()=>toast(await copyText(UI.pvPromos.map(x=>`${x.tel}${x.nombre?" · "+x.nombre:""}`).join("\n"))?"Teléfonos copiados":"No se pudo copiar");
+}
+
 /* ---------- Mejoras ---------- */
 const TIPOS=["Error","Mejora","Idea"], PRIOS=["Alta","Media","Baja"];
 function mejoras(){ return Object.entries(Store.data.mejoras||{}).map(([id,m])=>Object.assign({id},m)).sort((a,b)=>(a.estado==="hecha")-(b.estado==="hecha") || PRIOS.indexOf(a.prioridad)-PRIOS.indexOf(b.prioridad) || a.creado-b.creado); }
@@ -1144,6 +1269,7 @@ function viewAjustes(){
       <p class="muted" style="margin-top:4px">Elige qué secciones se ven en este dispositivo. Se guarda solo aquí.</p>
       <div class="seg">${[["completo","Completo"],["cocina","Solo cocina"],["reparto","Solo reparto"]].map(([k,l])=>`<button data-modo="${k}" aria-pressed="${deviceMode()===k}">${l}</button>`).join("")}</div>
     </div>
+    ${privacidadCard(c)}
     ${mejorasCard()}
     <div class="card"><h3 style="font-size:19px">Código QR del menú</h3>
       <p class="muted" style="margin-top:4px">El QR abre tu menú público, que se actualiza solo cuando cambias productos o precios.</p>
@@ -1164,6 +1290,7 @@ function viewAjustes(){
   document.querySelectorAll("[data-pm]").forEach(b=>b.onclick=()=>{ saveCfg({propinaModo:b.dataset.pm}); toast("Forma de reparto guardada"); });
   bindMejoras();
   bindReparto();
+  bindPrivacidad();
   document.querySelectorAll("[data-modo]").forEach(b=>b.onclick=()=>{ setDeviceMode(b.dataset.modo); toast("Listo. Este celular muestra: "+b.textContent); render(); });
   let papel=c.papel;
   document.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{ papel=b.dataset.w; document.querySelectorAll("[data-w]").forEach(x=>x.setAttribute("aria-pressed",x===b)); });
@@ -1207,7 +1334,7 @@ async function start(session){
   try { const { data:st } = await sb.from("staff").select("nombre").eq("user_id", session.user.id).maybeSingle(); Store.userName = (st && st.nombre) || ""; } catch(e){}
   document.body.classList.remove("locked");
   Store.on(render); render();
-  Store.init();
+  Store.init().then(()=>limpiezaDiaria());
 }
 async function boot(){
   $("#lver").textContent = "Versión " + APP_VERSION;
