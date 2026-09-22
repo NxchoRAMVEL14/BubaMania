@@ -17,7 +17,14 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script src="config.js?v=1.4.1"></script>
+<script>
+/* Respaldo: si config.js falta, está en caché o trae valores de ejemplo, se usan los datos de BubaManía */
+(function(){ var c=window.BUBA_CONFIG||{};
+  if(!c.url || !c.anonKey || /TU-PROYECTO|PEGA_AQUI/.test(c.url+c.anonKey))
+    window.BUBA_CONFIG={ url:"https://mcnhiivarnywbsptwvto.supabase.co", anonKey:"sb_publishable_CA8tx2nZrldjUADkvqhXKA_IHb47pzI" };
+})();
+</script>
 <style>
 :root{
   --bg:#F3EEFB; --surface:#FFFFFF; --surface2:#EAE2F7; --ink:#2B1745; --muted:#6E5C86;
@@ -243,7 +250,7 @@ body:not(.locked) #login{display:none}
 <div id="print"></div>
 
 <script>
-const APP_VERSION = "1.4.0";
+const APP_VERSION = "1.4.1";
 /* ---------- Utilidades ---------- */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -258,7 +265,7 @@ function toast(msg){ const t=document.createElement("div"); t.className="toast";
 
 /* ---------- Supabase ---------- */
 const CFG = window.BUBA_CONFIG || {};
-const sb = (window.supabase && CFG.url && CFG.anonKey && !CFG.url.includes("TU-PROYECTO")) ? window.supabase.createClient(CFG.url, CFG.anonKey) : null;
+const sb = (window.supabase && CFG.url && CFG.anonKey) ? window.supabase.createClient(CFG.url, CFG.anonKey) : null;
 const BUCKET = "menu";
 
 const Store = {
@@ -1470,7 +1477,7 @@ async function start(session){
 }
 async function boot(){
   $("#lver").textContent = "Versión " + APP_VERSION;
-  if (!sb){ document.body.classList.add("locked"); $("#lmsg").textContent="Falta configurar config.js con la URL y la clave pública de Supabase."; $("#lb").disabled=true; return; }
+  if (!sb){ document.body.classList.add("locked"); $("#lmsg").textContent = window.supabase ? "Falta la configuración de Supabase (config.js)." : "No se pudo conectar con el servidor. Revisa tu internet y vuelve a abrir la app."; $("#lb").disabled=true; return; }
   const { data:{ session } } = await sb.auth.getSession();
   if (session) return start(session);
   const doLogin = async()=>{

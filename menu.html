@@ -10,7 +10,14 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js"></script>
+<script src="config.js?v=1.4.1"></script>
+<script>
+/* Respaldo: si config.js falta, está en caché o trae valores de ejemplo, se usan los datos de BubaManía */
+(function(){ var c=window.BUBA_CONFIG||{};
+  if(!c.url || !c.anonKey || /TU-PROYECTO|PEGA_AQUI/.test(c.url+c.anonKey))
+    window.BUBA_CONFIG={ url:"https://mcnhiivarnywbsptwvto.supabase.co", anonKey:"sb_publishable_CA8tx2nZrldjUADkvqhXKA_IHb47pzI" };
+})();
+</script>
 <style>
 :root{--bg:#F3EEFB;--surface:#fff;--ink:#2B1745;--muted:#6E5C86;--taro:#7A4FD0;--taro-soft:#DCCDF7;--pink:#F2507F;--line:#D9CEEB;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
@@ -57,7 +64,7 @@ const money=n=>new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"}).
 const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-");
 (async()=>{
   const C=window.BUBA_CONFIG||{};
-  if(!window.supabase||!C.url||C.url.includes("TU-PROYECTO")){ document.getElementById("sub").textContent="Menú no disponible por el momento."; return; }
+  if(!window.supabase||!C.url){ document.getElementById("sub").textContent="Menú no disponible por el momento."; return; }
   const sb=window.supabase.createClient(C.url,C.anonKey);
   const [m,c]=await Promise.all([sb.from("menu").select("id,data"), sb.from("config").select("data").eq("id",1).maybeSingle()]);
   if(m.error){ document.getElementById("sub").textContent="No se pudo cargar el menú. Intenta de nuevo en un momento."; return; }
