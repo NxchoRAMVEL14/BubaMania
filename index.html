@@ -223,7 +223,8 @@ body:not(.locked) #login{display:none}
 </section>
 <header class="top">
   <div class="logo"><img src="logo.jpg" alt="" class="hlogo"><h1 id="bizName">BubaManía</h1></div>
-  <div class="sync" id="sync"><b></b><span>Conectando…</span></div>
+  <span class="pill" id="rolPill" style="margin-left:auto"></span>
+  <div class="sync" id="sync" style="margin-left:8px"><b></b><span>Conectando…</span></div>
 </header>
 
 <main id="view" aria-live="polite"></main>
@@ -242,7 +243,7 @@ body:not(.locked) #login{display:none}
 <div id="print"></div>
 
 <script>
-const APP_VERSION = "1.3.0";
+const APP_VERSION = "1.4.0";
 /* ---------- Utilidades ---------- */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -304,21 +305,30 @@ const Store = {
   },
   save(col, id, obj){
     const data = clone(obj);
+    const existed = col==="config" ? true : !!(this.data[col] && this.data[col][id]);
     if (col==="config") this.data.config=data; else this.data[col] = Object.assign({}, this.data[col], {[id]:data});
     this.emit();
-    const row = col==="config" ? {id:1, data} : {id, data};
     const key = col+"/"+(col==="config"?1:id);
     this.queue[key] = (this.queue[key]||Promise.resolve()).then(async()=>{
-      const { error } = await sb.from(col).upsert(row); if (error) throw error;
-    }).catch(e=>{ console.warn(e); toast("No se pudo guardar. Revisa tu conexión."); });
+      let res;
+      if (col==="config") res = await sb.from("config").update({data}).eq("id",1).select("id");
+      else if (existed && col!=="clientes") res = await sb.from(col).update({data}).eq("id",id).select("id");
+      else res = await sb.from(col).upsert({id, data}).select("id");
+      if (res.error) throw res.error;
+      if (!res.data || !res.data.length) throw new Error("rls");
+    }).catch(e=>{ console.warn(e); toast(friendlyErr(e)); this.load().then(()=>this.emit()).catch(()=>{}); });
     return this.queue[key];
   },
   remove(col, id){
     const copy = Object.assign({}, this.data[col]); delete copy[id]; this.data[col]=copy; this.emit();
     const key=col+"/"+id;
-    this.queue[key]=(this.queue[key]||Promise.resolve()).then(async()=>{ const {error}=await sb.from(col).delete().eq("id",id); if(error) throw error; }).catch(()=>toast("No se pudo borrar"));
+    this.queue[key]=(this.queue[key]||Promise.resolve()).then(async()=>{ const {error}=await sb.from(col).delete().eq("id",id); if(error) throw error; }).catch(e=>{ toast(friendlyErr(e)); this.load().then(()=>this.emit()).catch(()=>{}); });
   }
 };
+function friendlyErr(e){ const m=(e&&e.message)||"";
+  if (m==="rls" || /row-level security|permission denied/i.test(m)) return "Tu usuario no tiene permiso para hacer ese cambio";
+  if (/fetch|network|Failed/i.test(m)) return "No se pudo guardar. Revisa tu conexión.";
+  return m || "No se pudo guardar"; }
 function setSync(on, text){ const s=$("#sync"); s.classList.toggle("on", !!on); s.querySelector("span").textContent=text; }
 
 /* ---------- Imágenes ---------- */
@@ -381,11 +391,11 @@ function render(){
 
 /* ---------- Pedidos ---------- */
 function viewPedidos(){
-  const ms = cfg().meseros||[]; let f = myFilter(); if (f && !ms.includes(f)) f="";
+  const ms = can("reasignar") ? (cfg().meseros||[]) : []; let f = myFilter(); if (f && !ms.includes(f)) f="";
   const list = orders().filter(o=>isActive(o) && (!f || o.mesero===f)).sort((a,b)=>a.creado-b.creado);
   const paidToday = orders().filter(o=>o.estado==="pagado" && o.fecha===today()).length;
   $("#view").innerHTML = `
-    <div class="section-title"><h2>Pedidos activos</h2><button class="btn primary" id="newOrder">+ Nuevo pedido</button></div>
+    <div class="section-title"><h2>${Store.rol==="mesero"?"Mis pedidos":"Pedidos activos"}</h2>${can("crearPedido")?`<button class="btn primary" id="newOrder">+ Nuevo pedido</button>`:""}</div>
     ${ms.length ? `<div class="chips" role="group" aria-label="Filtrar por mesero"><button class="chip" data-f="" aria-pressed="${!f}">Todos</button>${ms.map(m=>`<button class="chip" data-f="${esc(m)}" aria-pressed="${f===m}">${esc(m)}</button>`).join("")}</div>`:""}
     ${list.length ? `<div class="orders">${list.map(o=>`
       <button class="order" data-open="${o.id}">
@@ -397,12 +407,13 @@ function viewPedidos(){
         <div class="amount">${money(orderTotal(o))}</div>
       </button>`).join("")}</div>`
     : `<div class="empty"><div class="big">${f?`${esc(f)} no tiene pedidos abiertos`:"No hay pedidos abiertos"}</div>Toca “Nuevo pedido” para empezar a tomar una orden.</div>`}
-    ${paidToday ? `<p class="muted" style="margin-top:16px">${paidToday} pedido(s) cobrado(s) hoy. Consúltalos en Caja.</p>`:""}`;
-  $("#newOrder").onclick = newOrder;
+    ${paidToday && isGestor() ? `<p class="muted" style="margin-top:16px">${paidToday} pedido(s) cobrado(s) hoy. Consúltalos en Caja.</p>`:""}`;
+  const nb=$("#newOrder"); if(nb) nb.onclick = newOrder;
   document.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{ setMyFilter(b.dataset.f); render(); });
   document.querySelectorAll("[data-open]").forEach(b=>b.onclick=()=>openOrder(b.dataset.open));
 }
 function waiterSelect(id, current){
+  if (!can("reasignar")) { const v = current || Store.userName; return `<input type="hidden" id="${id}" value="${esc(v)}"><p class="muted" style="font-size:13.5px;margin-top:0">Mesero: <strong>${esc(v)}</strong></p>`; }
   const ms=cfg().meseros||[];
   if (!ms.length) return `<p class="muted" style="font-size:13.5px;margin-top:0">Tip: agrega meseros en Ajustes para separar pedidos y propinas.</p>`;
   return `<div class="field"><label for="${id}">Mesero</label><select id="${id}"><option value="">Sin asignar</option>${ms.map(m=>`<option ${m===current?"selected":""}>${esc(m)}</option>`).join("")}</select></div>`;
@@ -472,7 +483,7 @@ function renderSheet(){
       ${cats.length ? `<div class="cats">${cats.map(ct=>`<button class="cat" data-cat="${esc(ct)}" aria-pressed="${ct===UI.cat}">${esc(ct)}</button>`).join("")}</div>
       <div class="prods">${prods.map(p=>`<button class="prod" data-add="${p.id}"><div class="ph" style="${p.foto?`background-image:url('${imgSrc(p.foto)}')`:""}">${p.foto?"":esc((p.nombre||"?")[0])}</div><span class="n">${esc(p.nombre)}</span><span class="p">${money(p.precio)}</span></button>`).join("")}</div>`
       : `<div class="empty" style="padding:20px">Tu menú está vacío. Agrega productos en la pestaña Menú o usa “Producto libre”.</div>`}
-      <div class="row" style="margin-top:10px"><button class="btn ghost sm" id="freeItem">+ Producto libre / combinación</button></div>
+      ${can("precios")?`<div class="row" style="margin-top:10px"><button class="btn ghost sm" id="freeItem">+ Producto libre / combinación</button></div>`:""}
       <div class="bill">
         ${o.comensales.map(p=>`<div class="bill-person ${p.id===UI.person?"sel":""}">
           <div class="spread"><button class="btn sm ghost" data-rename="${p.id}" style="border:0;padding:0"><strong style="font-family:Fredoka;font-size:18px">${esc(p.nombre)}</strong></button>
@@ -501,10 +512,10 @@ function renderSheet(){
   host.querySelectorAll("[data-cat]").forEach(b=>b.onclick=()=>{UI.cat=b.dataset.cat; renderSheet();});
   $("#addPerson").onclick=()=>promptText("Agregar persona","Nombre",`Persona ${o.comensales.length+1}`, v=>{ const pid=uid(); mutateOrder(x=>x.comensales.push({id:pid,nombre:v,items:[],pago:null})); UI.person=pid; });
   host.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{ const p=Store.data.menu[b.dataset.add]; addItem({prodId:b.dataset.add, nombre:p.nombre, precio:Number(p.precio)||0}); });
-  $("#freeItem").onclick=freeItem;
+  const fi=$("#freeItem"); if(fi) fi.onclick=freeItem;
   host.querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>changeQty(b.dataset.inc,1));
   host.querySelectorAll("[data-dec]").forEach(b=>b.onclick=()=>changeQty(b.dataset.dec,-1));
-  host.querySelectorAll("[data-price]").forEach(b=>b.onclick=()=>editPrice(b.dataset.price));
+  host.querySelectorAll("[data-price]").forEach(b=>b.onclick=()=>{ if(!can("precios")){ toast("Solo gerente o administrador pueden cambiar precios"); return; } editPrice(b.dataset.price); });
   host.querySelectorAll("[data-note]").forEach(b=>b.onclick=()=>editNote(b.dataset.note));
   host.querySelectorAll("[data-rename]").forEach(b=>b.onclick=()=>personMenu(b.dataset.rename));
   const tk=$("#toKitchen"); if (tk) tk.onclick=()=>{ mutateOrder(x=>x.estado="cocina"); toast("Enviado a cocina"); };
@@ -569,11 +580,11 @@ function orderMenu(o){
     <button class="btn primary block" id="ors">Guardar</button>
     ${o.tipo==="domicilio"?`<button class="btn mango block" id="ord" style="margin-top:10px">Datos de entrega</button>`:""}
     <button class="btn ghost block" id="orw" style="margin-top:10px">Enviar resumen por WhatsApp</button>
-    <button class="btn ghost block" id="orc" style="margin-top:10px;color:var(--pink)">Cancelar pedido</button>`, m=>{
+    ${can("cancelar")?`<button class="btn ghost block" id="orc" style="margin-top:10px;color:var(--pink)">Cancelar pedido</button>`:""}`, m=>{
     $("#ors",m).onclick=()=>{ const v=$("#orn",m).value.trim(); const w=$("#orm",m); mutateOrder(x=>{ if(v) x.nombre=v; if(w){ x.mesero=w.value; x.comensales.forEach(p=>{ if(p.pago) p.pago.mesero=w.value; }); } }); closeModal(); };
     $("#orw",m).onclick=()=>{ const tel=o.entrega&&o.entrega.telefono; window.open(tel?waLink(tel,ticketText(o)):"https://wa.me/?text="+encodeURIComponent(ticketText(o)),"_blank"); };
     const od=$("#ord",m); if(od) od.onclick=()=>{ closeModal(); deliveryForm(o.id||UI.openOrder); };
-    $("#orc",m).onclick=()=>{ if(!confirm("¿Cancelar este pedido? Se quitará de la lista.")) return; mutateOrder(x=>x.estado="cancelado"); closeModal(); closeOrder(); };
+    const oc=$("#orc",m); if(oc) oc.onclick=()=>{ if(!confirm("¿Cancelar este pedido? Se quitará de la lista.")) return; mutateOrder(x=>x.estado="cancelado"); closeModal(); closeOrder(); };
   });
 }
 
@@ -678,7 +689,7 @@ function viewCocina(){
     ${list.length?`<div class="kitchen">${list.map(o=>{ const items=o.comensales.flatMap(p=>p.items.filter(i=>!i.listo).map(i=>Object.assign({quien:p.nombre},i)));
       return `<div class="ktk"><div class="spread"><h3>${esc(o.nombre)}</h3><span class="muted">#${o.num} · ${hora(o.creado)}</span></div>${kindLine(o)?`<div class="kind">${kindLine(o)}</div>`:""}
         <ul>${items.map(i=>`<li><strong>${i.cant}×</strong> ${esc(i.nombre)} <span class="muted">(${esc(i.quien)})</span>${i.nota?`<br><span style="color:var(--pink);font-weight:700">${esc(i.nota)}</span>`:""}</li>`).join("")}</ul>
-        <button class="btn green block" data-ready="${o.id}">Marcar como listo</button></div>`;}).join("")}</div>`
+        ${can("cocina")?`<button class="btn green block" data-ready="${o.id}">Marcar como listo</button>`:`<p class="muted" style="margin:6px 0 0;font-size:14px">En preparación</p>`}</div>`;}).join("")}</div>`
     :`<div class="empty"><div class="big">Nada pendiente</div>Los pedidos enviados a cocina aparecen aquí en todos los dispositivos.</div>`}`;
   document.querySelectorAll("[data-ready]").forEach(b=>b.onclick=()=>{ const id=b.dataset.ready; const o=clone(Store.data.pedidos[id]); o.comensales.forEach(p=>p.items.forEach(i=>i.listo=true)); o.estado="listo"; Store.save("pedidos",id,o); toast(`${o.nombre} listo`); });
 }
@@ -817,6 +828,15 @@ function waiterBreakdown(list, pays, propinas, day){
   return {html, rows, defaultPool, modoTxt};
 }
 
+/* ---------- Roles ---------- */
+const TODAS=["pedidos","cocina","reparto","menu","caja","ajustes"];
+const ROLES={ admin:{label:"Administrador",tabs:TODAS}, gerente:{label:"Gerente",tabs:TODAS},
+  mesero:{label:"Mesero",tabs:["pedidos","cocina","reparto","ajustes"]}, cocinero:{label:"Cocinero",tabs:["cocina","ajustes"]}, repartidor:{label:"Repartidor",tabs:["reparto","ajustes"]} };
+const isGestor=()=>Store.rol==="admin"||Store.rol==="gerente";
+function can(p){ const r=Store.rol, g=isGestor();
+  return !!({precios:g, cancelar:g, reasignar:g, crearPedido:g||r==="mesero", cobrar:g||r==="mesero", cocina:g||r==="cocinero",
+    reparto:g||r==="repartidor", verPedido:g||r==="mesero", mejorasGestion:g, usuarios:g, modo:r==="admin"})[p]; }
+
 /* ---------- Privacidad ---------- */
 const PRIV = { responsable:"Joaquín Hermes Hill Ramírez", whatsapp:"524761134044", whatsappTxt:"476 113 4044", vigencia:"13 de septiembre de 2026" };
 function avisoUrl(){ return new URL("aviso-privacidad.html", location.href).href; }
@@ -907,7 +927,7 @@ function deliveryForm(id){
     <p class="muted" style="font-size:13px;margin:4px 0 8px">Toca el mapa o arrastra el pin rosa para ajustar el punto exacto.</p>
     <div class="dres" id="dres"></div>
     <div class="field"><label for="dref">Referencias</label><input id="dref" value="${esc(e.referencias)}" placeholder="Casa azul, portón negro, junto a la tienda"></div>
-    <div class="field"><label for="denv">Costo de envío</label><input id="denv" type="number" inputmode="decimal" value="${e.costoEnvio||0}"><p class="muted" id="denvh" style="margin:4px 0 0;font-size:13px"></p></div>
+    <div class="field"><label for="denv">Costo de envío</label><input id="denv" type="number" inputmode="decimal" value="${e.costoEnvio||0}" ${can("precios")?"":"readonly"}><p class="muted" id="denvh" style="margin:4px 0 0;font-size:13px"></p></div>
     <div class="field"><label>Pago</label><div class="seg">${[["contraentrega","Paga al recibir"],["pagado","Ya pagó"],["plataforma","Por plataforma"]].map(([k,l])=>`<button data-dp="${k}" aria-pressed="${e.pago===k}">${l}</button>`).join("")}</div></div>
     <div class="field" id="dpcF"><label for="dpc">¿Con cuánto paga?</label><input id="dpc" type="number" inputmode="decimal" value="${esc(e.pagaCon)}" placeholder="Ej. 500"></div>
     <div class="field"><label>¿Acepta promociones por WhatsApp?</label><div class="seg">${[["si","Sí acepta"],["no","No acepta"],["np","No se preguntó"]].map(([k,l])=>`<button data-pr="${k}" aria-pressed="${(e.promos===true?"si":e.promos===false?"no":"np")===k}">${l}</button>`).join("")}</div>
@@ -947,7 +967,7 @@ function deliveryForm(id){
       const b=$("#dfind",m); b.disabled=true; b.textContent="Buscando…";
       try { const r=await ubicar(t); await setDest(r.coords); if(r.label) toast(r.label); } catch(err){ toast(err.message); }
       b.disabled=false; b.textContent="Ubicar y calcular"; };
-    $("#denv",m).oninput=()=>{ e.envioManual=true; showRes(); };
+    $("#denv",m).oninput=()=>{ if(!can("precios")) return; e.envioManual=true; showRes(); };
     let pago=e.pago; const updP=()=>$("#dpcF",m).classList.toggle("hidden", pago!=="contraentrega"); updP();
     let promos = e.promos===true ? "si" : e.promos===false ? "no" : "np";
     m.querySelectorAll("[data-pr]").forEach(b=>b.onclick=()=>{ promos=b.dataset.pr; m.querySelectorAll("[data-pr]").forEach(x=>x.setAttribute("aria-pressed",x===b)); });
@@ -971,13 +991,13 @@ function repFilter(){ try { return localStorage.getItem("buba-filtro-rep")||""; 
 function setRepFilter(v){ try { localStorage.setItem("buba-filtro-rep", v); } catch(e){} }
 function viewReparto(){
   const c=cfg(); const reps=[...new Set([...(c.repartidores||[]), ...(c.plataformas||[])])];
-  let f=repFilter(); if(f && f!=="__none" && !reps.includes(f)) f="";
+  let f=isGestor()?repFilter():""; if(f && f!=="__none" && !reps.includes(f)) f="";
   const match=o=>!f || (f==="__none" ? !(o.entrega&&o.entrega.repartidor) : (o.entrega&&o.entrega.repartidor===f));
   const all=orders().filter(o=>o.tipo==="domicilio" && o.estado!=="cancelado");
   const act=all.filter(o=>!(o.entrega&&o.entrega.estado==="entregado")).filter(match).sort((a,b)=>a.creado-b.creado);
   const done=all.filter(o=>o.entrega&&o.entrega.estado==="entregado"&&o.fecha===today()).filter(match);
-  $("#view").innerHTML=`<div class="section-title"><h2>Reparto</h2><span class="muted">${act.length} por entregar</span></div>
-    ${reps.length?`<div class="chips" role="group" aria-label="Filtrar por repartidor"><button class="chip" data-rf="" aria-pressed="${!f}">Todos</button>${reps.map(r=>`<button class="chip" data-rf="${esc(r)}" aria-pressed="${f===r}">${esc(r)}</button>`).join("")}<button class="chip" data-rf="__none" aria-pressed="${f==="__none"}">Sin asignar</button></div>`:""}
+  $("#view").innerHTML=`<div class="section-title"><h2>${Store.rol==="repartidor"?"Mis entregas":"Reparto"}</h2><span class="muted">${act.length} por entregar</span></div>
+    ${reps.length&&isGestor()?`<div class="chips" role="group" aria-label="Filtrar por repartidor"><button class="chip" data-rf="" aria-pressed="${!f}">Todos</button>${reps.map(r=>`<button class="chip" data-rf="${esc(r)}" aria-pressed="${f===r}">${esc(r)}</button>`).join("")}<button class="chip" data-rf="__none" aria-pressed="${f==="__none"}">Sin asignar</button></div>`:""}
     ${!c.local?`<div class="tip warn">Falta la ubicación del local (Ajustes → Reparto a domicilio).</div>`:""}
     ${act.length?act.map(repCard).join(""):`<div class="empty"><div class="big">Sin entregas pendientes</div>Los pedidos a domicilio aparecen aquí en cuanto se capturan.</div>`}
     ${done.length?`<div class="card"><h3 style="font-size:19px">Entregados hoy (${done.length})</h3>${done.map(o=>`<div class="spread" style="padding:6px 0;border-bottom:1px solid var(--line)"><span>#${o.num} ${esc(o.entrega.cliente||o.nombre)} · ${esc(o.entrega.repartidor||"")}</span><span class="muted">${o.entrega.entregado?hora(o.entrega.entregado):""}</span></div>`).join("")}</div>`:""}`;
@@ -1004,10 +1024,10 @@ function repCard(o){
     <div class="row" style="margin-top:10px">
       ${e.lat!=null?`<a class="btn sm primary" href="${mapsLink(e)}" target="_blank" rel="noopener">Ruta en Maps</a>`:""}
       ${e.telefono?`<a class="btn sm ghost" href="tel:${onlyDigits(e.telefono)}">Llamar</a><a class="btn sm ghost" href="${waLink(e.telefono, e.estado==="en_camino"?caminoMsg(o):confirmMsg(o))}" target="_blank" rel="noopener">WhatsApp</a>`:""}
-      <button class="btn sm ghost" data-openo="${o.id}">Ver pedido</button>
-      ${!e.repartidor&&Store.userName?`<button class="btn sm ghost" data-take="${o.id}">Lo llevo yo</button>`:""}
+      ${can("verPedido")?`<button class="btn sm ghost" data-openo="${o.id}">Ver pedido</button>`:""}
+      ${!e.repartidor&&Store.userName&&can("reparto")?`<button class="btn sm ghost" data-take="${o.id}">Lo llevo yo</button>`:""}
     </div>
-    ${o.entrega ? (e.estado==="en_camino"?`<button class="btn green block" style="margin-top:10px" data-deliver="${o.id}">Entregado</button>`:`<button class="btn mango block" style="margin-top:10px" data-go="${o.id}">Salí a entregar</button>`) : ""}
+    ${o.entrega && can("reparto") ? (e.estado==="en_camino"?`<button class="btn green block" style="margin-top:10px" data-deliver="${o.id}">Entregado</button>`:`<button class="btn mango block" style="margin-top:10px" data-go="${o.id}">Salí a entregar</button>`) : ""}
   </div>`;
 }
 function deliverFlow(id){
@@ -1087,7 +1107,9 @@ function bindReparto(){
 const MODOS={completo:["pedidos","cocina","reparto","menu","caja","ajustes"], cocina:["cocina","ajustes"], reparto:["reparto","ajustes"]};
 function deviceMode(){ try { return localStorage.getItem("buba-modo")||"completo"; } catch(e){ return "completo"; } }
 function setDeviceMode(v){ try { localStorage.setItem("buba-modo", v); } catch(e){} UI.tab = MODOS[v][0]; }
-function applyMode(){ const allowed=MODOS[deviceMode()]||MODOS.completo;
+function applyMode(){ let allowed=(ROLES[Store.rol]||ROLES.mesero).tabs;
+  if(Store.rol==="admin"){ const dm=MODOS[deviceMode()]||MODOS.completo; allowed=allowed.filter(t=>dm.includes(t)); if(!allowed.length) allowed=["ajustes"]; }
+  const rp=$("#rolPill"); if(rp) rp.textContent=(ROLES[Store.rol]||{}).label||"";
   if(!allowed.includes(UI.tab)) UI.tab=allowed[0];
   document.querySelectorAll("nav.tabs button").forEach(b=>{ b.hidden=!allowed.includes(b.dataset.tab); if(b.dataset.tab===UI.tab) b.setAttribute("aria-current","page"); else b.removeAttribute("aria-current"); }); }
 
@@ -1197,6 +1219,108 @@ function bindPrivacidad(){
   const pc=$("#pvPromoCopy"); if(pc) pc.onclick=async()=>toast(await copyText(UI.pvPromos.map(x=>`${x.tel}${x.nombre?" · "+x.nombre:""}`).join("\n"))?"Teléfonos copiados":"No se pudo copiar");
 }
 
+/* ---------- Mi cuenta y usuarios ---------- */
+function miCuentaCard(){
+  return `<div class="card" id="cuentaCard"><h3 style="font-size:19px">Mi cuenta</h3>
+    <p style="margin:6px 0"><strong>${esc(Store.userName||"Sin nombre")}</strong> <span class="pill">${esc((ROLES[Store.rol]||{}).label||"")}</span><br><span class="muted" style="font-size:14px">${esc(Store.userEmail)}</span></p>
+    <div class="row"><button class="btn ghost sm" id="pwBtn">Cambiar mi contraseña</button><button class="btn ghost sm" id="logout">Cerrar sesión</button></div></div>`;
+}
+function bindMiCuenta(){
+  const pw=$("#pwBtn"); if(pw) pw.onclick=()=>modal(`<h3>Cambiar mi contraseña</h3>
+    <div class="field"><label for="np1">Nueva contraseña (mínimo 8 caracteres)</label><input id="np1" type="password" autocomplete="new-password"></div>
+    <div class="field"><label for="np2">Repítela</label><input id="np2" type="password" autocomplete="new-password"></div>
+    <button class="btn primary block" id="npS">Guardar</button>`, m=>{
+    $("#npS",m).onclick=async()=>{ const a=$("#np1",m).value, b=$("#np2",m).value;
+      if(a.length<8){ toast("Debe tener al menos 8 caracteres"); return; } if(a!==b){ toast("No coinciden"); return; }
+      const {error}=await sb.auth.updateUser({password:a}); if(error){ toast(error.message); return; } closeModal(); toast("Contraseña actualizada"); }; });
+  const lo=$("#logout"); if(lo) lo.onclick=async()=>{ if(!confirm("¿Cerrar sesión en este dispositivo?")) return; await sb.auth.signOut(); location.reload(); };
+}
+function viewAjustesBasico(){
+  $("#view").innerHTML=`<div class="section-title"><h2>Ajustes</h2></div>${miCuentaCard()}${mejorasCard()}
+    <p class="muted" style="text-align:center;font-size:14px">BubaManía versión ${APP_VERSION} · <a href="manual.html" target="_blank" rel="noopener">Manual de uso</a> · <a href="aviso-privacidad.html" target="_blank" rel="noopener">Aviso de privacidad</a></p>`;
+  bindMiCuenta(); bindMejoras();
+}
+function usuariosCard(){
+  const L=UI.staffList;
+  const rows = !L ? `<p class="muted">Cargando…</p>` : L.error ? `<p class="muted">${esc(L.error)}</p>` :
+    L.list.map(u=>`<div class="spread" style="padding:8px 0;border-bottom:1px solid var(--line)"><div><strong>${esc(u.nombre)}</strong> <span class="pill ${u.activo?"":"pagado"}">${esc((ROLES[u.rol]||{}).label||u.rol)}${u.activo?"":" · inactivo"}</span><div class="muted" style="font-size:13px">${esc(u.email||"")}</div></div>
+      ${(u.rol==="admin"&&Store.rol!=="admin")?"":`<button class="btn sm ghost" data-uedit="${u.user_id}">Editar</button>`}</div>`).join("");
+  return `<div class="card" id="usrCard"><div class="spread"><h3 style="font-size:19px">Usuarios y roles</h3><button class="btn primary sm" id="uNew">+ Nuevo usuario</button></div>
+    <div style="margin-top:6px">${rows}</div>
+    <p class="muted" style="font-size:13px">Cada mesero ve solo los pedidos a su nombre; cada repartidor, sus entregas y las que no tienen repartidor; cocina ve todo lo que está en preparación.</p></div>`;
+}
+async function loadStaff(){
+  UI.staffAt=Date.now();
+  const {data,error}=await sb.from("staff").select("user_id,nombre,rol,activo,email").order("nombre");
+  const orden=["admin","gerente","mesero","cocinero","repartidor"];
+  UI.staffList = error ? {error:"No se pudo cargar el personal. ¿Ejecutaste migracion-1.4.sql?"} : {list:data.sort((a,b)=>orden.indexOf(a.rol)-orden.indexOf(b.rol))};
+  if(UI.tab==="ajustes") render();
+}
+const rolesAsignables=()=>Object.keys(ROLES).filter(r=>r!=="admin"||Store.rol==="admin");
+function genPass(){ const c="abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; const a=new Uint32Array(10); crypto.getRandomValues(a); return Array.from(a,x=>c[x%c.length]).join(""); }
+async function usuariosFn(body){
+  const {data,error}=await sb.functions.invoke("usuarios",{body});
+  if(error){ let msg="La función de usuarios no responde. Revisa el paso 3 de la actualización en el README.";
+    try { const j=await error.context.json(); if(j&&j.error) msg=j.error; } catch(e){} throw new Error(msg); }
+  if(data&&data.error) throw new Error(data.error); return data;
+}
+function syncListas(viejo, nuevo, rol){
+  const c=cfg(); let ms=[...(c.meseros||[])], rs=[...(c.repartidores||[])]; const antes=JSON.stringify([ms,rs]);
+  if(viejo){ ms=ms.filter(x=>x!==viejo); rs=rs.filter(x=>x!==viejo); }
+  if(rol==="mesero" && !ms.includes(nuevo)) ms.push(nuevo);
+  if(rol==="repartidor" && !rs.includes(nuevo)) rs.push(nuevo);
+  if(JSON.stringify([ms,rs])!==antes) Store.save("config","main",Object.assign(c,{meseros:ms,repartidores:rs}));
+}
+function mostrarAcceso(nombre, email, pass){
+  const txt=`Hola ${nombre}, ya tienes acceso a la app de ${cfg().negocio}.\nEntra en: ${new URL("index.html",location.href).href}\nCorreo: ${email}\nContraseña temporal: ${pass}\nCámbiala en Ajustes → Mi cuenta al entrar.`;
+  modal(`<h3>Acceso listo</h3><div class="ptext">${esc(txt)}</div>
+    <div class="row"><button class="btn primary" id="axC">Copiar</button><a class="btn ghost" href="https://wa.me/?text=${encodeURIComponent(txt)}" target="_blank" rel="noopener">Enviar por WhatsApp</a></div>
+    <p class="muted" style="font-size:13px">Por seguridad, pídele que cambie la contraseña en su primer ingreso.</p>`, m=>{
+    $("#axC",m).onclick=async()=>toast(await copyText(txt)?"Copiado":"No se pudo copiar"); });
+}
+function nuevoUsuario(){
+  let rol="mesero"; const pass=genPass();
+  modal(`<h3>Nuevo usuario</h3>
+    <div class="field"><label for="un">Nombre (así aparecerá en pedidos y tickets)</label><input id="un" autocomplete="off" placeholder="Ej. Karla"></div>
+    <div class="field"><label for="ue">Correo</label><input id="ue" type="email" inputmode="email" autocomplete="off"></div>
+    <div class="field"><label>Rol</label><div class="seg">${rolesAsignables().map(r=>`<button data-ur="${r}" aria-pressed="${r===rol}">${ROLES[r].label}</button>`).join("")}</div></div>
+    <div class="field"><label for="up">Contraseña temporal</label><input id="up" value="${pass}" autocomplete="off"></div>
+    <button class="btn primary block" id="uC">Crear usuario</button>`, m=>{
+    m.querySelectorAll("[data-ur]").forEach(b=>b.onclick=()=>{ rol=b.dataset.ur; m.querySelectorAll("[data-ur]").forEach(x=>x.setAttribute("aria-pressed",x===b)); });
+    $("#uC",m).onclick=async()=>{ const nombre=$("#un",m).value.trim(), email=$("#ue",m).value.trim(), password=$("#up",m).value;
+      if(!nombre||!email){ toast("Escribe nombre y correo"); return; }
+      const b=$("#uC",m); b.disabled=true; b.textContent="Creando…";
+      try { await usuariosFn({accion:"crear", nombre, email, rol, password}); syncListas(null, nombre, rol); closeModal(); loadStaff(); mostrarAcceso(nombre, email.toLowerCase(), password); }
+      catch(e){ toast(e.message); b.disabled=false; b.textContent="Crear usuario"; } };
+  });
+}
+function editarUsuario(uid){
+  const u=(UI.staffList&&UI.staffList.list||[]).find(x=>x.user_id===uid); if(!u) return;
+  const yo = u.email && u.email===Store.userEmail; let rol=u.rol;
+  modal(`<h3>Editar usuario</h3><p class="muted" style="margin-top:0">${esc(u.email||"")}</p>
+    <div class="field"><label for="en">Nombre</label><input id="en" value="${esc(u.nombre)}"><p class="muted" style="font-size:13px;margin:4px 0 0">Si cambias el nombre, sus pedidos anteriores conservan el nombre anterior.</p></div>
+    <div class="field"><label>Rol</label><div class="seg">${rolesAsignables().map(r=>`<button data-er="${r}" aria-pressed="${r===rol}" ${yo?"disabled":""}>${ROLES[r].label}</button>`).join("")}</div>${yo?`<p class="muted" style="font-size:13px">No puedes cambiar tu propio rol.</p>`:""}</div>
+    <label class="chk" style="margin-bottom:12px"><input type="checkbox" id="ea" ${u.activo?"checked":""} ${yo?"disabled":""}> Usuario activo (puede entrar a la app)</label>
+    <button class="btn primary block" id="eS">Guardar cambios</button>
+    <button class="btn ghost block" id="eP" style="margin-top:8px">Asignar nueva contraseña</button>`, m=>{
+    m.querySelectorAll("[data-er]").forEach(b=>b.onclick=()=>{ rol=b.dataset.er; m.querySelectorAll("[data-er]").forEach(x=>x.setAttribute("aria-pressed",x===b)); });
+    $("#eS",m).onclick=async()=>{ const nombre=$("#en",m).value.trim(), activo=$("#ea",m).checked;
+      const {error}=await sb.rpc("actualizar_personal",{uid, p_nombre:nombre, p_rol:rol, p_activo:activo});
+      if(error){ toast(/unique|duplicate/i.test(error.message)?"Ya existe alguien con ese nombre":error.message); return; }
+      syncListas(u.nombre, nombre, activo?rol:"");
+      if(yo) Store.userName=nombre;
+      closeModal(); toast("Usuario actualizado"); loadStaff(); };
+    $("#eP",m).onclick=async()=>{ const pass=genPass(); if(!confirm(`Se asignará una contraseña nueva a ${u.nombre}. ¿Continuar?`)) return;
+      try { await usuariosFn({accion:"contrasena", user_id:uid, password:pass}); closeModal(); mostrarAcceso(u.nombre, u.email||"", pass); } catch(e){ toast(e.message); } };
+  });
+}
+function bindUsuarios(){
+  if(!$("#usrCard")) return;
+  if(!UI.staffAt || Date.now()-UI.staffAt>60000) loadStaff();
+  $("#uNew").onclick=nuevoUsuario;
+  document.querySelectorAll("[data-uedit]").forEach(b=>b.onclick=()=>editarUsuario(b.dataset.uedit));
+}
+
 /* ---------- Mejoras ---------- */
 const TIPOS=["Error","Mejora","Idea"], PRIOS=["Alta","Media","Baja"];
 function mejoras(){ return Object.entries(Store.data.mejoras||{}).map(([id,m])=>Object.assign({id},m)).sort((a,b)=>(a.estado==="hecha")-(b.estado==="hecha") || PRIOS.indexOf(a.prioridad)-PRIOS.indexOf(b.prioridad) || a.creado-b.creado); }
@@ -1211,8 +1335,8 @@ function mejorasCard(){
     <button class="btn primary block" id="madd">Agregar a la lista</button>
     <div style="margin-top:12px">${list.length?list.map(m=>`<div class="imp"><div><div class="t">${m.estado==="hecha"?`<s>${esc(m.texto)}</s>`:esc(m.texto)}</div>
         <div class="m"><span class="tag ${m.prioridad}">${m.prioridad}</span><span class="tag ${m.estado==="hecha"?"hecha":""}">${m.tipo}${m.estado==="enviada"?" · enviada":m.estado==="hecha"?" · hecha":""}</span>${esc(m.autor||"")} · ${new Date(m.creado).toLocaleDateString("es-MX")}</div></div>
-        <button class="btn sm ghost" data-mej="${m.id}">⋯</button></div>`).join(""):`<p class="muted">Aún no hay mejoras anotadas.</p>`}</div>
-    ${pend.length?`<div class="row" style="margin-top:12px"><button class="btn mango" id="mcopy" style="flex:1">Copiar lista para Claude</button>${navigator.share?`<button class="btn ghost" id="mshare">Compartir</button>`:""}</div>`:""}
+        ${can("mejorasGestion")?`<button class="btn sm ghost" data-mej="${m.id}">⋯</button>`:""}</div>`).join(""):`<p class="muted">Aún no hay mejoras anotadas.</p>`}</div>
+    ${pend.length&&can("mejorasGestion")?`<div class="row" style="margin-top:12px"><button class="btn mango" id="mcopy" style="flex:1">Copiar lista para Claude</button>${navigator.share?`<button class="btn ghost" id="mshare">Compartir</button>`:""}</div>`:""}
   </div>`;
 }
 function mejorasText(){
@@ -1249,8 +1373,11 @@ function bindMejoras(){
 
 /* ---------- Ajustes ---------- */
 function viewAjustes(){
+  if(!isGestor()){ viewAjustesBasico(); return; }
   const c=cfg();
   $("#view").innerHTML=`<div class="section-title"><h2>Ajustes</h2></div>
+    ${miCuentaCard()}
+    ${usuariosCard()}
     <div class="card">
       <div class="field"><label for="an">Nombre del negocio</label><input id="an" value="${esc(c.negocio)}"></div>
       <div class="field"><label for="ad">Dirección o teléfono (sale en el ticket)</label><input id="ad" value="${esc(c.direccion||"")}"></div>
@@ -1265,10 +1392,11 @@ function viewAjustes(){
       <div class="field" style="margin-top:12px"><label>¿Cómo se reparten las propinas?</label><div class="seg">${[["individual","Cada mesero las suyas"],["comun","Fondo común en partes iguales"]].map(([k,l])=>`<button data-pm="${k}" aria-pressed="${(c.propinaModo||"individual")===k}">${l}</button>`).join("")}</div></div>
     </div>
     ${repartoCard(c)}
-    <div class="card"><h3 style="font-size:19px">Este celular</h3>
+    ${can("modo")?`<div class="card"><h3 style="font-size:19px">Este celular</h3>
       <p class="muted" style="margin-top:4px">Elige qué secciones se ven en este dispositivo. Se guarda solo aquí.</p>
       <div class="seg">${[["completo","Completo"],["cocina","Solo cocina"],["reparto","Solo reparto"]].map(([k,l])=>`<button data-modo="${k}" aria-pressed="${deviceMode()===k}">${l}</button>`).join("")}</div>
-    </div>
+      <p class="muted" style="font-size:13px">Solo para el administrador. Los demás ven automáticamente lo que corresponde a su rol.</p>
+    </div>`:""}
     ${privacidadCard(c)}
     ${mejorasCard()}
     <div class="card"><h3 style="font-size:19px">Código QR del menú</h3>
@@ -1280,7 +1408,7 @@ function viewAjustes(){
     </div>
     <div class="card"><h3 style="font-size:19px">Datos</h3>
       <p class="muted" style="margin-top:4px">Sesión: ${esc(Store.userName?Store.userName+" · ":"")}${esc(Store.userEmail)}. Los pedidos y el menú se sincronizan en vivo entre todos los dispositivos.</p>
-      <div class="row"><button class="btn ghost" id="purge">Borrar pedidos de hace más de 30 días</button><button class="btn ghost" id="logout">Cerrar sesión</button></div>
+      <div class="row"><button class="btn ghost" id="purge">Borrar pedidos de hace más de 30 días</button></div>
     </div>
     <p class="muted" style="text-align:center;font-size:14px">BubaManía versión ${APP_VERSION} · <a href="manual.html" target="_blank" rel="noopener">Manual de uso</a></p>`;
   const saveCfg=patch=>Store.save("config","main",Object.assign(cfg(),patch));
@@ -1291,6 +1419,8 @@ function viewAjustes(){
   bindMejoras();
   bindReparto();
   bindPrivacidad();
+  bindMiCuenta();
+  bindUsuarios();
   document.querySelectorAll("[data-modo]").forEach(b=>b.onclick=()=>{ setDeviceMode(b.dataset.modo); toast("Listo. Este celular muestra: "+b.textContent); render(); });
   let papel=c.papel;
   document.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{ papel=b.dataset.w; document.querySelectorAll("[data-w]").forEach(x=>x.setAttribute("aria-pressed",x===b)); });
@@ -1327,11 +1457,13 @@ function publicMenuUrl(){ return new URL("menu.html", location.href).href; }
 async function start(session){
   const { data:ok, error } = await sb.rpc("is_staff");
   if (error || !ok){
-    $("#lmsg").textContent = error ? "No se pudo verificar tu usuario. Revisa la conexión." : "Este usuario no está dado de alta como personal (tabla staff).";
+    $("#lmsg").textContent = error ? "No se pudo verificar tu usuario. Revisa la conexión." : "Este usuario no está dado de alta o fue desactivado. Pide acceso al gerente.";
     await sb.auth.signOut(); return;
   }
   Store.userEmail = session.user.email || "";
-  try { const { data:st } = await sb.from("staff").select("nombre").eq("user_id", session.user.id).maybeSingle(); Store.userName = (st && st.nombre) || ""; } catch(e){}
+  try { const { data:st } = await sb.from("staff").select("nombre, rol, activo").eq("user_id", session.user.id).maybeSingle();
+    Store.userName = (st && st.nombre) || ""; Store.rol = (st && st.rol) || "mesero"; } catch(e){ Store.rol="mesero"; }
+  UI.tab = (ROLES[Store.rol]||ROLES.mesero).tabs[0];
   document.body.classList.remove("locked");
   Store.on(render); render();
   Store.init().then(()=>limpiezaDiaria());

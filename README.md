@@ -1,4 +1,4 @@
-# BubaManía · versión 1.3.0
+# BubaManía · versión 1.4.0
 
 App de pedidos (en local, para llevar y a domicilio), cuentas por persona, meseros, propinas, reparto, cocina, caja, menú con QR y tickets.
 
@@ -8,8 +8,9 @@ App de pedidos (en local, para llevar y a domicilio), cuentas por persona, meser
 - `menu.html`: menú público para clientes (el QR apunta aquí).
 - `config.js`: aquí van la URL y la clave pública de Supabase.
 - `supabase/schema.sql`: base de datos completa (instalación nueva).
-- `supabase/migracion-1.1.sql`, `1.2` y `1.3`: solo para actualizar instalaciones anteriores.
+- `supabase/migracion-1.1.sql` a `1.4`: solo para actualizar instalaciones anteriores.
 - `supabase/functions/domicilio/index.ts`: función que calcula km, tiempo y busca direcciones.
+- `supabase/functions/usuarios/index.ts`: función para crear usuarios y asignar contraseñas desde la app.
 - `manual.html` y carpeta `manual/`: manual de uso con imágenes (se abre desde la app).
 - `manual/manual.pdf`: el mismo manual para imprimir o mandar por WhatsApp.
 - `manifest.webmanifest` e íconos: para instalarla en el celular como app.
@@ -70,6 +71,14 @@ La clave pública puede estar visible en GitHub; la seguridad la dan las reglas 
 - Configura el ancho de papel (58 u 80 mm) y prueba con **Imprimir ticket de prueba**.
 - La impresora debe aparecer en el diálogo de impresión del celular (AirPrint en iPhone; servicio de impresión en Android).
 
+## Actualizar a la versión 1.4 (roles)
+
+1. **Usuarios base.** En Supabase → **Authentication → Users**, confirma que existan `osirv92@gmail.com` (administrador) y `wakoshill21@gmail.com` (gerente). Si falta alguno: **Add user → Create new user**, con **Auto Confirm User**.
+2. **Migraciones.** En **SQL Editor** ejecuta, en orden, las que te falten: `migracion-1.3.sql` (si no la corriste) y luego `migracion-1.4.sql`. Al final verás una tabla con el personal y su rol. Todo usuario que ya existía queda como **Mesero**; ajústalo después desde la app.
+3. **Función `usuarios`.** En **Edge Functions → Deploy a new function → Via Editor**, nómbrala exactamente `usuarios`, pega `supabase/functions/usuarios/index.ts` y presiona **Deploy** (deja activada la verificación JWT). No necesita secretos.
+4. **GitHub.** Sube y reemplaza todos los archivos de esta carpeta.
+5. **Probar.** Entra con tu correo: arriba debe decir **Administrador** y abajo **Versión 1.4.0**. En **Ajustes → Usuarios y roles** da de alta a meseros, cocineros y repartidores.
+
 ## ¿Ya tenías la versión 1.2?
 
 1. En Supabase ejecuta `supabase/migracion-1.3.sql` (borrado de datos de clientes y conservación).
@@ -105,6 +114,14 @@ Edita o vuelve a subir `index.html` o `menu.html` en GitHub. Los productos, prec
 - En el plan gratuito de Supabase, los proyectos sin actividad por un tiempo pueden pausarse. Revisa las condiciones vigentes en supabase.com/pricing.
 
 ## Historial de versiones
+
+**1.4.0**
+- Roles: Administrador, Gerente, Mesero, Cocinero y Repartidor, con permisos validados en la base de datos (políticas RLS y validación por campo).
+- Mesero: ve solo sus pedidos, cobra y no cambia precios, productos libres, envío ni cancela.
+- Cocinero: solo Cocina. Repartidor: solo sus entregas y las no asignadas.
+- Ajustes → Usuarios y roles: alta de usuarios, cambio de rol, desactivar y asignar contraseña desde la app (función `usuarios`).
+- Ajustes → Mi cuenta: cambiar contraseña y cerrar sesión.
+- Mensajes claros cuando un rol intenta algo no permitido.
 
 **1.3.0**
 - Aviso de privacidad integral (`aviso-privacidad.html`) conforme a la LFPDPPP de 2025, con resumen al inicio.

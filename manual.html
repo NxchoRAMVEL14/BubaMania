@@ -60,7 +60,7 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 <main>
 <img src="logo.jpg" alt="Logotipo de BubaManía" style="width:120px;height:120px;border-radius:50%;object-fit:cover;display:block">
 <h1>Manual de uso</h1>
-<p class="lead">BubaManía · versión 1.3.0 · para caja, meseros y cocina · <a href="manual/manual.pdf">Descargar PDF</a></p>
+<p class="lead">BubaManía · versión 1.4.0 · para caja, meseros y cocina · <a href="manual/manual.pdf">Descargar PDF</a></p>
 
 <nav class="toc" aria-label="Contenido"><strong>Contenido</strong>
 <ol>
@@ -80,6 +80,7 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
   <li><a href="#reparto">Pantalla de reparto</a></li>
   <li><a href="#config-reparto">Configurar el reparto</a></li>
   <li><a href="#privacidad">Privacidad de datos</a></li>
+  <li><a href="#roles">Roles y usuarios</a></li>
   <li><a href="#problemas">Problemas frecuentes</a></li>
 </ol></nav>
 
@@ -296,7 +297,7 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
   <li><strong>Envío:</strong> define hasta cuántos km es gratis, el cargo al exceder y el cargo por cada km extra. Abajo aparece un ejemplo del cálculo.</li>
   <li><strong>Tiempo de preparación:</strong> se suma al tiempo de ruta en el mensaje de confirmación al cliente.</li>
   <li>Agrega <strong>repartidores</strong> y <strong>plataformas</strong>, toca <span class="ui">Guardar reparto</span> y luego <span class="ui">Probar cálculo de rutas</span>.</li>
-  <li>En <strong>Este celular</strong> elige “Solo cocina” para la tableta de cocina o “Solo reparto” para el celular del repartidor.</li>
+  <li><strong>Este celular</strong> (solo administrador) limita las secciones de un dispositivo. Normalmente no hace falta: cada usuario ve automáticamente lo de su rol (sección 17).</li>
 </ol>
 </section>
 
@@ -333,8 +334,47 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 <div class="tip warn">Si cambias el plazo de conservación, agregas una finalidad nueva o empiezas a pedir otros datos, el aviso debe actualizarse antes. Anótalo en “Mejoras para la app”.</div>
 </section>
 
+<section id="roles">
+<h2><span class="n">17</span>Roles y usuarios</h2>
+<p>Cada persona entra con su propio correo y ve solo lo que le corresponde. Los permisos se revisan en la base de datos, así que no se pueden saltar aunque alguien manipule la app.</p>
+<div class="table-wrap"><table>
+<tr><th>Rol</th><th>Qué ve</th><th>Qué puede hacer</th></tr>
+<tr><td><strong>Administrador</strong></td><td>Todo</td><td>Todo, incluido crear otros administradores.</td></tr>
+<tr><td><strong>Gerente</strong></td><td>Todo</td><td>Todo, excepto modificar administradores.</td></tr>
+<tr><td><strong>Mesero</strong></td><td>Sus pedidos, su cocina y sus entregas</td><td>Tomar pedidos a su nombre, capturar domicilios y cobrar. No cambia precios, no agrega productos libres, no cancela ni reasigna.</td></tr>
+<tr><td><strong>Cocinero</strong></td><td>Cocina</td><td>Marcar pedidos como listos.</td></tr>
+<tr><td><strong>Repartidor</strong></td><td>Sus entregas y las no asignadas</td><td>Tomar entregas, salir, entregar y cobrar al entregar.</td></tr>
+</table></div>
+<p>Todos pueden anotar mejoras y cambiar su propia contraseña en <span class="ui">Ajustes → Mi cuenta</span>.</p>
+<h3>Dar de alta a alguien</h3>
+<div class="pair">
+<figure><img src="manual/35-usuarios.png" alt="Lista de usuarios y roles"><figcaption>Ajustes → Usuarios y roles.</figcaption></figure>
+<figure><img src="manual/36-nuevo-usuario.png" alt="Nuevo usuario"><figcaption>Nombre, correo, rol y contraseña temporal.</figcaption></figure>
+</div>
+<ol class="steps">
+  <li>Toca <span class="ui">+ Nuevo usuario</span>. El <strong>nombre</strong> es el que sale en pedidos y tickets; no puede repetirse.</li>
+  <li>Escribe su correo, elige el rol y deja la contraseña temporal que propone la app.</li>
+  <li>Toca <span class="ui">Crear usuario</span>. Los meseros y repartidores se agregan solos a sus listas.</li>
+  <li>Comparte el acceso con <span class="ui">Enviar por WhatsApp</span> y pídele que cambie su contraseña al entrar.</li>
+</ol>
+<div class="pair">
+<figure><img src="manual/37-acceso.png" alt="Datos de acceso"><figcaption>Datos de acceso listos para enviar.</figcaption></figure>
+<figure><img src="manual/38-editar-usuario.png" alt="Editar usuario"><figcaption>Cambiar nombre, rol, desactivar o asignar contraseña nueva.</figcaption></figure>
+</div>
+<h3>Cuando alguien deja de trabajar</h3>
+<p>Abre su usuario y desmarca <span class="ui">Usuario activo</span>. No podrá entrar, pero sus pedidos y ventas se conservan. Si olvidó su contraseña, usa <span class="ui">Asignar nueva contraseña</span>.</p>
+<h3>Así lo ve cada rol</h3>
+<div class="pair">
+<figure><img src="manual/39-mesero-pedidos.png" alt="Vista del mesero"><figcaption>Mesero: solo “Mis pedidos” y sin Menú ni Caja.</figcaption></figure>
+<figure><img src="manual/40-mesero-pedido.png" alt="Pedido visto por mesero"><figcaption>Mesero: puede agregar productos y cobrar, pero no cambiar precios.</figcaption></figure>
+<figure><img src="manual/42-cocinero.png" alt="Vista del cocinero"><figcaption>Cocinero: solo Cocina y Ajustes.</figcaption></figure>
+<figure><img src="manual/43-repartidor.png" alt="Vista del repartidor"><figcaption>Repartidor: “Mis entregas”.</figcaption></figure>
+</div>
+<div class="tip warn">Si un mesero intenta algo que su rol no permite, la app muestra un aviso como “Solo gerente o administrador pueden cambiar precios” y no guarda el cambio.</div>
+</section>
+
 <section id="problemas">
-<h2><span class="n">17</span>Problemas frecuentes</h2>
+<h2><span class="n">18</span>Problemas frecuentes</h2>
 <div class="table-wrap"><table>
 <tr><th>Qué pasa</th><th>Qué hacer</th></tr>
 <tr><td>Arriba dice “Reconectando…”</td><td>Revisa el internet del celular. Al volver la señal, la app se actualiza sola.</td></tr>
@@ -345,12 +385,15 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 <tr><td>No aparece “Mejoras para la app”</td><td>Falta ejecutar <code>supabase/migracion-1.1.sql</code> en Supabase.</td></tr>
 <tr><td>Los km dicen “(aprox.)” o “Probar cálculo de rutas” falla</td><td>La función <code>domicilio</code> no está activa o falta la clave <code>ORS_API_KEY</code> (README, paso 4).</td></tr>
 <tr><td>“No se pudo revisar” o “No se pudo borrar” en Privacidad</td><td>Falta ejecutar <code>supabase/migracion-1.3.sql</code>.</td></tr>
+<tr><td>“Tu usuario no tiene permiso para hacer ese cambio”</td><td>Tu rol no permite esa acción. Pide al gerente que la haga o que revise tu rol.</td></tr>
+<tr><td>“La función de usuarios no responde”</td><td>Falta publicar la función <code>usuarios</code> en Supabase (README).</td></tr>
+<tr><td>Un mesero no ve un pedido</td><td>El pedido está a nombre de otro mesero. El gerente puede reasignarlo desde el pedido (⋯).</td></tr>
 <tr><td>No se guardan los clientes frecuentes</td><td>Falta ejecutar <code>supabase/migracion-1.2.sql</code>.</td></tr>
 <tr><td>El enlace de WhatsApp no se lee</td><td>Marca el punto en el mapa. Pide al cliente “ubicación actual”, no “en tiempo real”.</td></tr>
 </table></div>
 </section>
 
-<footer>BubaManía · Manual de la versión 1.3.0 · Las imágenes usan datos de ejemplo.</footer>
+<footer>BubaManía · Manual de la versión 1.4.0 · Las imágenes usan datos de ejemplo.</footer>
 </main>
 </body>
 </html>
