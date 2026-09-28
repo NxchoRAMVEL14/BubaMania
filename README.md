@@ -1,4 +1,4 @@
-# BubaManía · versión 1.5.1
+# BubaManía · versión 1.5.2
 
 App de pedidos (en local, para llevar y a domicilio), cuentas por persona, meseros, propinas, reparto, cocina, caja, menú con QR y tickets.
 
@@ -9,6 +9,7 @@ App de pedidos (en local, para llevar y a domicilio), cuentas por persona, meser
 - `config.js`: aquí van la URL y la clave pública de Supabase.
 - `supabase/schema.sql`: base de datos completa (instalación nueva).
 - `supabase/migracion-1.1.sql` a `1.4`: solo para actualizar instalaciones anteriores.
+- `supabase/alta-usuario.sql`: dar de alta a alguien del personal sin la función `usuarios`.
 - `supabase/functions/domicilio/index.ts`: función que calcula km, tiempo y busca direcciones.
 - `supabase/functions/usuarios/index.ts`: función para crear usuarios y asignar contraseñas desde la app.
 - `manual.html` y carpeta `manual/`: manual de uso con imágenes (se abre desde la app).
@@ -114,6 +115,11 @@ Edita o vuelve a subir `index.html` o `menu.html` en GitHub. Los productos, prec
 - En el plan gratuito de Supabase, los proyectos sin actividad por un tiempo pueden pausarse. Revisa las condiciones vigentes en supabase.com/pricing.
 
 ## Historial de versiones
+
+**1.5.2**
+- El menú público deja fijos el logo y el nombre en la barra superior al bajar; al tocarlos se regresa al inicio.
+- Si la función `usuarios` no está publicada, la app ya no solo avisa: abre una ventana de alta manual con los dos pasos y el SQL listo para copiar.
+- Nuevo archivo `supabase/alta-usuario.sql` con el mismo procedimiento.
 
 **1.5.1**
 - El menú público (`menu.html`) estrena el fondo del menú impreso: degradado azul a verde, rayos de luz y burbujas, todo hecho con CSS (no pesa nada extra).

@@ -250,7 +250,7 @@ body:not(.locked) #login{display:none}
 <div id="print"></div>
 
 <script>
-const APP_VERSION = "1.5.1";
+const APP_VERSION = "1.5.2";
 /* ---------- Utilidades ---------- */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1415,9 +1415,32 @@ const rolesAsignables=()=>Object.keys(ROLES).filter(r=>r!=="admin"||Store.rol===
 function genPass(){ const c="abcdefghjkmnpqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789"; const a=new Uint32Array(10); crypto.getRandomValues(a); return Array.from(a,x=>c[x%c.length]).join(""); }
 async function usuariosFn(body){
   const {data,error}=await sb.functions.invoke("usuarios",{body});
-  if(error){ let msg="La función de usuarios no responde. Revisa el paso 3 de la actualización en el README.";
-    try { const j=await error.context.json(); if(j&&j.error) msg=j.error; } catch(e){} throw new Error(msg); }
+  if(error){ let msg="", srv=false;
+    try { const j=await error.context.json(); if(j&&j.error){ msg=j.error; srv=true; } } catch(e){}
+    const err=new Error(msg||"No se pudo conectar con la función de usuarios.");
+    err.sinFuncion=!srv; throw err; }
   if(data&&data.error) throw new Error(data.error); return data;
+}
+/* Alta manual, para cuando la función "usuarios" no está publicada en Supabase */
+function altaManual(nombre, email, rol){
+  const sql=`insert into public.staff (user_id, nombre, rol, email, activo)\n`+
+    `select id, '${nombre.replace(/'/g,"''")}', '${rol}', email, true\n`+
+    `  from auth.users where lower(email) = '${email.toLowerCase().replace(/'/g,"''")}'\n`+
+    `on conflict (user_id) do update set nombre = excluded.nombre,\n`+
+    `  rol = excluded.rol, email = excluded.email, activo = true;`;
+  modal(`<h3>Alta manual de ${esc(nombre)}</h3>
+    <p style="margin-top:0">La función <strong>usuarios</strong> no está publicada en Supabase, así que la app no puede crear la cuenta sola. Hazlo en dos pasos:</p>
+    <ol style="padding-left:20px;margin:0 0 12px">
+      <li style="margin:6px 0"><strong>Crea la cuenta:</strong> Supabase → <span class="ui">Authentication → Users → Add user → Create new user</span>.
+        Correo <strong>${esc(email)}</strong>, una contraseña de 8 caracteres o más, y marca <strong>Auto Confirm User</strong>.</li>
+      <li style="margin:6px 0"><strong>Asígnale el rol:</strong> copia este SQL, pégalo en <span class="ui">SQL Editor → New query</span> y presiona Run.</li>
+    </ol>
+    <div class="ptext">${esc(sql)}</div>
+    <div class="row"><button class="btn primary" id="amC">Copiar SQL</button><button class="btn ghost" id="amX">Cerrar</button></div>
+    <p class="muted" style="font-size:13px">Para que la app pueda crear usuarios sola, publica la función <strong>usuarios</strong> (paso 3 de la actualización a la versión 1.4 en el README).</p>`, m=>{
+    $("#amC",m).onclick=async()=>toast(await copyText(sql)?"SQL copiado":"No se pudo copiar");
+    $("#amX",m).onclick=closeModal;
+  });
 }
 function syncListas(viejo, nuevo, rol){
   const c=cfg(); let ms=[...(c.meseros||[])], rs=[...(c.repartidores||[])]; const antes=JSON.stringify([ms,rs]);
@@ -1446,7 +1469,8 @@ function nuevoUsuario(){
       if(!nombre||!email){ toast("Escribe nombre y correo"); return; }
       const b=$("#uC",m); b.disabled=true; b.textContent="Creando…";
       try { await usuariosFn({accion:"crear", nombre, email, rol, password}); syncListas(null, nombre, rol); closeModal(); loadStaff(); mostrarAcceso(nombre, email.toLowerCase(), password); }
-      catch(e){ toast(e.message); b.disabled=false; b.textContent="Crear usuario"; } };
+      catch(e){ b.disabled=false; b.textContent="Crear usuario";
+        if(e.sinFuncion){ closeModal(); altaManual(nombre, email, rol); } else toast(e.message); } };
   });
 }
 function editarUsuario(uid){
