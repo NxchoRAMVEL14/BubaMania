@@ -1,4 +1,4 @@
-# BubaManía · versión 1.4.0
+# BubaManía · versión 1.5.1
 
 App de pedidos (en local, para llevar y a domicilio), cuentas por persona, meseros, propinas, reparto, cocina, caja, menú con QR y tickets.
 
@@ -114,6 +114,25 @@ Edita o vuelve a subir `index.html` o `menu.html` en GitHub. Los productos, prec
 - En el plan gratuito de Supabase, los proyectos sin actividad por un tiempo pueden pausarse. Revisa las condiciones vigentes en supabase.com/pricing.
 
 ## Historial de versiones
+
+**1.5.1**
+- El menú público (`menu.html`) estrena el fondo del menú impreso: degradado azul a verde, rayos de luz y burbujas, todo hecho con CSS (no pesa nada extra).
+- Cada categoría va en una tarjeta translúcida, como el recuadro del menú laminado.
+- Precios sin centavos ($60 en vez de $60.00) y aderezos como “Gratis”.
+- Solo cambian `menu.html` y `index.html` (número de versión). No requiere tocar Supabase.
+
+**1.5.0**
+- Combinaciones: productos que juntan varios artículos del menú con precio propio, guardables y reutilizables; los meseros pueden venderlas.
+- Combinaciones armadas solo para un pedido, con opción de guardarlas en el menú (gerente y administrador).
+- Desglose de lo que incluye cada combinación en cocina, en el ticket y en el menú del QR.
+- Caja: combinaciones vendidas y piezas que salieron dentro de ellas.
+- Cierre de periodo: respaldo CSV, conteo previo y borrado de pedidos por fecha con confirmación escrita (gerente y administrador). Sustituye al botón de borrar pedidos de más de 30 días.
+- No requiere cambios en Supabase: solo reemplazar los archivos.
+
+**1.4.1**
+- La conexión a Supabase queda integrada en `index.html` y `menu.html` como respaldo: si `config.js` falta, está en caché o trae valores de ejemplo, la app funciona igual.
+- `config.js` se descarga siempre en su versión más reciente (`?v=`).
+- Mensaje distinto si el problema es de internet y no de configuración.
 
 **1.4.0**
 - Roles: Administrador, Gerente, Mesero, Cocinero y Repartidor, con permisos validados en la base de datos (políticas RLS y validación por campo).

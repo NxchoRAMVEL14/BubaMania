@@ -60,7 +60,7 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 <main>
 <img src="logo.jpg" alt="Logotipo de BubaManía" style="width:120px;height:120px;border-radius:50%;object-fit:cover;display:block">
 <h1>Manual de uso</h1>
-<p class="lead">BubaManía · versión 1.4.0 · para caja, meseros y cocina · <a href="manual/manual.pdf">Descargar PDF</a></p>
+<p class="lead">BubaManía · versión 1.5.1 · para caja, meseros y cocina · <a href="manual/manual.pdf">Descargar PDF</a></p>
 
 <nav class="toc" aria-label="Contenido"><strong>Contenido</strong>
 <ol>
@@ -81,6 +81,7 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
   <li><a href="#config-reparto">Configurar el reparto</a></li>
   <li><a href="#privacidad">Privacidad de datos</a></li>
   <li><a href="#roles">Roles y usuarios</a></li>
+  <li><a href="#combos">Combinaciones y cierre de periodo</a></li>
   <li><a href="#problemas">Problemas frecuentes</a></li>
 </ol></nav>
 
@@ -211,12 +212,13 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 <h2><span class="n">10</span>Código QR para clientes</h2>
 <div class="pair">
 <figure><img src="manual/18-qr.png" alt="Generar e imprimir QR"><figcaption>Ajustes → Código QR del menú.</figcaption></figure>
-<figure><img src="manual/20-menu-cliente.png" alt="Menú que ve el cliente"><figcaption>Lo que ve el cliente al escanear. Se actualiza solo al cambiar precios.</figcaption></figure>
+<figure><img src="manual/20-menu-cliente.png" alt="Menú que ve el cliente"><figcaption>Lo que ve el cliente al escanear: fondo de agua y burbujas, como el menú impreso. Se actualiza solo al cambiar precios.</figcaption></figure>
 </div>
 <ol class="steps">
   <li>El enlace del menú ya viene puesto. Toca <span class="ui">Generar QR</span>.</li>
   <li>Toca <span class="ui">Imprimir QR</span> para una hoja con el nombre del negocio, lista para enmicar y poner en las mesas.</li>
   <li>No necesitas reimprimir el QR cuando cambies el menú.</li>
+  <li>El menú en línea muestra el precio redondeado (por ejemplo $60) y los aderezos como “Gratis”.</li>
 </ol>
 </section>
 
@@ -373,8 +375,34 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 <div class="tip warn">Si un mesero intenta algo que su rol no permite, la app muestra un aviso como “Solo gerente o administrador pueden cambiar precios” y no guarda el cambio.</div>
 </section>
 
+<section id="combos">
+<h2><span class="n">18</span>Combinaciones y cierre de periodo</h2>
+<h3>Combinaciones</h3>
+<p>Una combinación junta varios productos del menú y se cobra a un precio propio, por ejemplo “Combo Buba = alitas + frappé”.</p>
+<div class="pair">
+<figure><img src="manual/44-combinacion.png" alt="Armar una combinación"><figcaption>Menú → <span class="ui">+ Combinación</span>. La app muestra cuánto costaría por separado y el ahorro.</figcaption></figure>
+<figure><img src="manual/45-cocina-combo.png" alt="Combinación en cocina"><figcaption>En cocina y en el ticket se desglosa lo que incluye.</figcaption></figure>
+</div>
+<ol class="steps">
+  <li><strong>Guardada en el menú:</strong> en la pestaña Menú toca <span class="ui">+ Combinación</span>, agrega los productos, pon el precio y guárdala. Aparece como un producto más, así que <strong>los meseros también pueden venderla</strong>.</li>
+  <li><strong>Solo para un pedido:</strong> dentro del pedido toca <span class="ui">+ Combinación</span>, ármala y decide si la guardas en el menú o es solo para esa vez. Esto es únicamente para gerente y administrador.</li>
+  <li>Se muestra en el menú del QR con la línea “Incluye: …”.</li>
+  <li>En Caja aparece cuántas vendiste y cuántas piezas de cada producto salieron dentro de combinaciones, útil para el inventario.</li>
+</ol>
+<div class="tip"><span class="ui">+ Producto libre</span> sigue existiendo para algo que solo pasa una vez y no vale la pena guardar.</div>
+<h3>Cierre de periodo</h3>
+<figure><img src="manual/47-cierre.png" alt="Cierre de periodo" class="wide"><figcaption>Ajustes → Cierre de periodo. Solo gerente y administrador.</figcaption></figure>
+<ol class="steps">
+  <li>Elige la fecha: se borran los pedidos hasta ese día, incluido.</li>
+  <li>Toca <span class="ui">Ver cuántos son</span> para saber cuántos pedidos se borrarían.</li>
+  <li>Toca <span class="ui">Descargar respaldo (CSV)</span> y guarda el archivo. Se abre en Excel, con una línea por producto vendido.</li>
+  <li>Toca <span class="ui">Borrar pedidos de ese periodo</span> y escribe BORRAR para confirmar.</li>
+</ol>
+<div class="tip warn">Los pedidos borrados no se recuperan y los cortes de caja de esos días dejan de estar disponibles. Descarga siempre el respaldo antes; conviene guardarlo por si hay una aclaración fiscal. El menú, los clientes, los usuarios y los ajustes no se tocan, y el borrado automático de datos personales a los 12 meses sigue funcionando igual.</div>
+</section>
+
 <section id="problemas">
-<h2><span class="n">18</span>Problemas frecuentes</h2>
+<h2><span class="n">19</span>Problemas frecuentes</h2>
 <div class="table-wrap"><table>
 <tr><th>Qué pasa</th><th>Qué hacer</th></tr>
 <tr><td>Arriba dice “Reconectando…”</td><td>Revisa el internet del celular. Al volver la señal, la app se actualiza sola.</td></tr>
@@ -393,7 +421,7 @@ footer{margin-top:48px;color:var(--muted);font-size:14px;text-align:center}
 </table></div>
 </section>
 
-<footer>BubaManía · Manual de la versión 1.4.0 · Las imágenes usan datos de ejemplo.</footer>
+<footer>BubaManía · Manual de la versión 1.5.1 · Las capturas de la app usan datos de ejemplo; las del menú y las fotos de producto son reales.</footer>
 </main>
 </body>
 </html>

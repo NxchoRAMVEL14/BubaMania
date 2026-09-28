@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Menú · BubaManía</title>
 <link rel="icon" href="favicon.png" type="image/png">
-<meta name="theme-color" content="#7A4FD0">
+<meta name="theme-color" content="#062E6F">
+<meta name="color-scheme" content="light">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js?v=1.4.1"></script>
+<script src="config.js?v=1.5.1"></script>
 <script>
 /* Respaldo: si config.js falta, está en caché o trae valores de ejemplo, se usan los datos de BubaManía */
 (function(){ var c=window.BUBA_CONFIG||{};
@@ -19,55 +20,137 @@
 })();
 </script>
 <style>
-:root{--bg:#F3EEFB;--surface:#fff;--ink:#2B1745;--muted:#6E5C86;--taro:#7A4FD0;--taro-soft:#DCCDF7;--pink:#F2507F;--line:#D9CEEB;
-  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#1A1026;--surface:#261838;--ink:#F3ECFF;--muted:#B7A6D1;--taro:#A383F0;--taro-soft:#3E2A5E;--pink:#FF6E97;--line:#3E2D57}}
-:root[data-theme="dark"]{--bg:#1A1026;--surface:#261838;--ink:#F3ECFF;--muted:#B7A6D1;--taro:#A383F0;--taro-soft:#3E2A5E;--pink:#FF6E97;--line:#3E2D57}
+:root{
+  --deep:#062E6F; --blue:#0B4FA0; --azul:#1179C4; --teal:#14A5A2; --verde:#6FBE3F;
+  --panel:rgba(255,255,255,.88); --borde:rgba(255,255,255,.8);
+  --ink:#0E2340; --muted:#41618A; --precio:#0B4FA0; --naranja:#E8760C;
+  box-sizing:border-box;
+}
 *,*::before,*::after{box-sizing:inherit}
-html,body{margin:0;background:var(--bg);color:var(--ink);font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.45}
+html{scroll-padding-top:86px}
+body{
+  margin:0; color:var(--ink); background:var(--deep);
+  font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif; line-height:1.45;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
 h1,h2{font-family:"Fredoka","DM Sans",system-ui,sans-serif;font-weight:600;margin:0}
-main{max-width:640px;margin:0 auto;padding:22px 16px 48px}
-.logo{display:flex;gap:4px;align-items:flex-end;margin-bottom:6px}
-.logo i{display:block;width:12px;height:12px;border-radius:50%;background:var(--ink)}
-.logo i:nth-child(2){width:16px;height:16px;background:var(--taro)}.logo i:nth-child(3){background:var(--pink)}
-h1{font-size:40px;font-weight:700;line-height:1.05}
-.cats{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);display:flex;gap:6px;overflow-x:auto;padding:12px 0;margin:8px 0 0;z-index:2}
-.cats a{flex:none;text-decoration:none;color:var(--ink);background:var(--taro-soft);padding:7px 14px;border-radius:999px;font-weight:700;font-size:14px}
-h2{font-size:26px;margin:22px 0 6px;scroll-margin-top:70px}
-.item{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;padding:10px 0;border-bottom:1.5px dashed var(--line)}
-.item img{width:76px;height:76px;object-fit:cover;border-radius:16px;display:block}
-.item .n{font-weight:700;font-size:17px}.item .d{font-size:14px;color:var(--muted)}
-.item .p{font-family:Fredoka,sans-serif;font-weight:600;font-size:19px}
-.item.off{opacity:.45}
-.gallery img{width:100%;border-radius:16px;margin-top:14px}
-.pdf{display:inline-block;margin-top:16px;background:var(--taro);color:#fff;text-decoration:none;padding:11px 18px;border-radius:999px;font-weight:700}
-.muted{color:var(--muted)}
-.top{display:flex;gap:14px;align-items:center}
-.mlogo{width:96px;height:96px;border-radius:50%;object-fit:cover;flex:none;border:3px solid var(--surface);box-shadow:0 2px 0 rgba(43,23,69,.15)}
-@media (max-width:360px){.mlogo{width:76px;height:76px}}
+
+/* ---------- Fondo: agua, rayos de luz y burbujas ---------- */
+.mar{position:fixed;inset:0;z-index:-2;
+  background:linear-gradient(180deg,#052869 0%,#0B4FA0 24%,#1179C4 46%,#14A5A2 70%,#6FBE3F 100%)}
+.rayos{position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.5;
+  background:
+    linear-gradient(196deg,rgba(255,255,255,.34) 0 4%,transparent 4.6%),
+    linear-gradient(174deg,rgba(255,255,255,.22) 0 3%,transparent 3.6%),
+    linear-gradient(203deg,rgba(255,255,255,.16) 0 6%,transparent 6.8%);
+  background-position:16% 0,58% 0,82% 0; background-repeat:no-repeat}
+.burbujas{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.burbujas i{position:absolute;bottom:-14vh;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.92),rgba(255,255,255,.34) 42%,rgba(255,255,255,.09) 62%,transparent 70%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);
+  animation:subir linear infinite}
+@keyframes subir{
+  from{transform:translateY(0) translateX(0);opacity:0}
+  12%{opacity:.85}
+  85%{opacity:.7}
+  to{transform:translateY(-118vh) translateX(22px);opacity:0}
+}
+@media (prefers-reduced-motion:reduce){
+  .burbujas i{animation:none;bottom:auto;opacity:.5}
+  .burbujas i:nth-child(odd){top:18%}.burbujas i:nth-child(even){top:62%}
+}
+
+/* ---------- Contenido ---------- */
+main{max-width:640px;margin:0 auto;padding:26px 16px 44px;position:relative}
+.top{display:flex;gap:14px;align-items:center;color:#fff;text-shadow:0 2px 10px rgba(3,22,54,.45)}
+.mlogo{width:104px;height:104px;border-radius:50%;object-fit:cover;flex:none;
+  border:3px solid rgba(255,255,255,.9);box-shadow:0 8px 24px rgba(3,22,54,.4)}
+h1{font-size:40px;font-weight:700;line-height:1.05;color:#fff}
+#sub{margin:5px 0 0;font-size:15px;color:rgba(255,255,255,.88)}
+
+.cats{position:sticky;top:0;z-index:3;display:flex;gap:7px;overflow-x:auto;
+  padding:11px 16px;margin:16px -16px 4px;scrollbar-width:none;
+  background:rgba(6,46,111,.55);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px)}
+.cats::-webkit-scrollbar{display:none}
+.cats a{flex:none;text-decoration:none;color:#08305F;background:rgba(255,255,255,.92);
+  padding:7px 14px;border-radius:999px;font-weight:700;font-size:14px;white-space:nowrap}
+
+.tarjeta{background:var(--panel);border:1.5px solid var(--borde);border-radius:24px;
+  padding:14px 18px 6px;margin:18px 0;box-shadow:0 14px 34px rgba(3,26,63,.28);
+  backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
+h2{font-size:27px;text-align:center;color:var(--deep);margin:4px 0 10px;scroll-margin-top:86px}
+
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:13px;align-items:center;
+  padding:11px 0;border-bottom:1.5px dashed rgba(11,79,160,.28)}
+.item:last-child{border-bottom:0}
+.item img{width:76px;height:76px;object-fit:cover;border-radius:16px;display:block;
+  box-shadow:0 3px 10px rgba(3,26,63,.22)}
+.item .n{font-weight:700;font-size:17px}
+.item .d{font-size:14px;color:var(--muted)}
+.item .p{font-family:Fredoka,sans-serif;font-weight:600;font-size:19px;color:var(--precio)}
+.item.off{opacity:.5}
+.item.off .p{color:var(--muted)}
+
+.aviso{background:var(--panel);border:1.5px solid var(--borde);border-radius:20px;
+  padding:14px 18px;margin:18px 0;text-align:center}
+.gallery img{width:100%;border-radius:20px;margin-top:14px;box-shadow:0 14px 34px rgba(3,26,63,.28)}
+.pdf{display:inline-block;margin-top:18px;background:var(--naranja);color:#fff;text-decoration:none;
+  padding:12px 20px;border-radius:999px;font-weight:700;box-shadow:0 8px 20px rgba(3,26,63,.3)}
+footer{margin-top:34px;font-size:14px;text-align:center;color:rgba(255,255,255,.9);
+  text-shadow:0 1px 6px rgba(3,22,54,.5)}
+footer a{color:#fff}
+@media (max-width:360px){.mlogo{width:82px;height:82px}h1{font-size:33px}}
 </style>
 </head>
 <body>
+<div class="mar" aria-hidden="true"></div>
+<div class="rayos" aria-hidden="true"></div>
+<div class="burbujas" aria-hidden="true">
+  <i style="left:4%;width:14px;height:14px;animation-duration:19s;animation-delay:-2s"></i>
+  <i style="left:11%;width:7px;height:7px;animation-duration:14s;animation-delay:-9s"></i>
+  <i style="left:18%;width:22px;height:22px;animation-duration:24s;animation-delay:-14s"></i>
+  <i style="left:25%;width:10px;height:10px;animation-duration:16s;animation-delay:-5s"></i>
+  <i style="left:33%;width:30px;height:30px;animation-duration:29s;animation-delay:-20s"></i>
+  <i style="left:40%;width:6px;height:6px;animation-duration:13s;animation-delay:-1s"></i>
+  <i style="left:47%;width:17px;height:17px;animation-duration:21s;animation-delay:-11s"></i>
+  <i style="left:55%;width:9px;height:9px;animation-duration:15s;animation-delay:-6s"></i>
+  <i style="left:62%;width:25px;height:25px;animation-duration:26s;animation-delay:-17s"></i>
+  <i style="left:69%;width:12px;height:12px;animation-duration:18s;animation-delay:-3s"></i>
+  <i style="left:76%;width:8px;height:8px;animation-duration:14s;animation-delay:-10s"></i>
+  <i style="left:83%;width:20px;height:20px;animation-duration:23s;animation-delay:-15s"></i>
+  <i style="left:90%;width:11px;height:11px;animation-duration:17s;animation-delay:-7s"></i>
+  <i style="left:96%;width:16px;height:16px;animation-duration:20s;animation-delay:-12s"></i>
+</div>
+
 <main>
-  <div class="top"><img src="logo.jpg" alt="Logotipo de BubaManía" class="mlogo"><div><h1 id="biz">BubaManía</h1><p class="muted" id="sub" style="margin:4px 0 0">Cargando menú…</p></div></div>
+  <div class="top">
+    <img src="logo.jpg" alt="Logotipo de BubaManía" class="mlogo">
+    <div><h1 id="biz">BubaManía</h1><p id="sub">Cargando menú…</p></div>
+  </div>
   <nav class="cats" id="cats" aria-label="Categorías"></nav>
   <div id="menu"></div>
   <div class="gallery" id="gal"></div>
   <div id="pdf"></div>
-  <footer class="muted" style="margin-top:36px;font-size:14px;text-align:center">
-    Usamos tus datos solo para atender tu pedido. <a href="aviso-privacidad.html" style="color:var(--taro)">Aviso de privacidad</a>
+  <footer>
+    Usamos tus datos solo para atender tu pedido.<br>
+    <a href="aviso-privacidad.html">Aviso de privacidad</a>
   </footer>
 </main>
+
 <script>
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
-const money=n=>new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN"}).format(Number(n)||0);
-const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g,"-");
+const money=n=>{ const v=Number(n)||0; if(v===0) return "Gratis";
+  return new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",
+    minimumFractionDigits:Number.isInteger(v)?0:2}).format(v); };
+const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-");
+const aviso=t=>{ document.getElementById("menu").innerHTML=`<div class="aviso">${esc(t)}</div>`; };
 (async()=>{
   const C=window.BUBA_CONFIG||{};
   if(!window.supabase||!C.url){ document.getElementById("sub").textContent="Menú no disponible por el momento."; return; }
   const sb=window.supabase.createClient(C.url,C.anonKey);
   const [m,c]=await Promise.all([sb.from("menu").select("id,data"), sb.from("config").select("data").eq("id",1).maybeSingle()]);
-  if(m.error){ document.getElementById("sub").textContent="No se pudo cargar el menú. Intenta de nuevo en un momento."; return; }
+  if(m.error){ document.getElementById("sub").textContent="Nuestro menú";
+    aviso("No se pudo cargar el menú. Intenta de nuevo en un momento."); return; }
   const cfg=(c.data&&c.data.data)||{};
   const biz=cfg.negocio||"BubaManía";
   document.getElementById("biz").textContent=biz; document.title="Menú · "+biz;
@@ -75,10 +158,11 @@ const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/
   const ps=m.data.map(r=>Object.assign({id:r.id},r.data)).sort((a,b)=>(a.orden??0)-(b.orden??0)||String(a.nombre).localeCompare(b.nombre));
   const cats=[...new Set([...(cfg.categorias||[]),...ps.map(p=>p.cat)])].filter(ct=>ps.some(p=>p.cat===ct));
   document.getElementById("cats").innerHTML=cats.map(ct=>`<a href="#${slug(ct)}">${esc(ct)}</a>`).join("");
-  document.getElementById("menu").innerHTML=cats.map(ct=>`<h2 id="${slug(ct)}">${esc(ct)}</h2>`+ps.filter(p=>p.cat===ct).map(p=>`
+  const html=cats.map(ct=>`<section class="tarjeta"><h2 id="${slug(ct)}">${esc(ct)}</h2>`+ps.filter(p=>p.cat===ct).map(p=>`
     <div class="item ${p.activo===false?"off":""}">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy">`:"<span></span>"}
       <div><div class="n">${esc(p.nombre)}</div>${p.desc?`<div class="d">${esc(p.desc)}</div>`:""}${p.tipo==="combo"&&p.componentes?`<div class="d">Incluye: ${esc(p.componentes.map(x=>x.cant+"× "+x.nombre).join(", "))}</div>`:""}${p.activo===false?`<div class="d">Agotado por hoy</div>`:""}</div>
-      <div class="p">${money(p.precio)}</div></div>`).join("")).join("") || `<p class="muted">Pronto publicaremos nuestro menú.</p>`;
+      <div class="p">${money(p.precio)}</div></div>`).join("")+`</section>`).join("");
+  if(html) document.getElementById("menu").innerHTML=html; else aviso("Pronto publicaremos nuestro menú.");
   document.getElementById("gal").innerHTML=(cfg.menuFotos||[]).filter(f=>/^https?:/.test(f)).map(f=>`<img src="${esc(f)}" alt="Menú impreso" loading="lazy">`).join("");
   if(cfg.menuPdf&&/^https?:/.test(cfg.menuPdf)) document.getElementById("pdf").innerHTML=`<a class="pdf" href="${esc(cfg.menuPdf)}" target="_blank" rel="noopener">Ver menú en PDF</a>`;
 })();
