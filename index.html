@@ -250,7 +250,7 @@ body:not(.locked) #login{display:none}
 <div id="print"></div>
 
 <script>
-const APP_VERSION = "1.4.1";
+const APP_VERSION = "1.5.0";
 /* ---------- Utilidades ---------- */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -490,7 +490,7 @@ function renderSheet(){
       ${cats.length ? `<div class="cats">${cats.map(ct=>`<button class="cat" data-cat="${esc(ct)}" aria-pressed="${ct===UI.cat}">${esc(ct)}</button>`).join("")}</div>
       <div class="prods">${prods.map(p=>`<button class="prod" data-add="${p.id}"><div class="ph" style="${p.foto?`background-image:url('${imgSrc(p.foto)}')`:""}">${p.foto?"":esc((p.nombre||"?")[0])}</div><span class="n">${esc(p.nombre)}</span><span class="p">${money(p.precio)}</span></button>`).join("")}</div>`
       : `<div class="empty" style="padding:20px">Tu menú está vacío. Agrega productos en la pestaña Menú o usa “Producto libre”.</div>`}
-      ${can("precios")?`<div class="row" style="margin-top:10px"><button class="btn ghost sm" id="freeItem">+ Producto libre / combinación</button></div>`:""}
+      ${can("precios")?`<div class="row" style="margin-top:10px"><button class="btn ghost sm" id="freeItem">+ Producto libre</button><button class="btn ghost sm" id="comboItem">+ Combinación</button></div>`:""}
       <div class="bill">
         ${o.comensales.map(p=>`<div class="bill-person ${p.id===UI.person?"sel":""}">
           <div class="spread"><button class="btn sm ghost" data-rename="${p.id}" style="border:0;padding:0"><strong style="font-family:Fredoka;font-size:18px">${esc(p.nombre)}</strong></button>
@@ -520,6 +520,7 @@ function renderSheet(){
   $("#addPerson").onclick=()=>promptText("Agregar persona","Nombre",`Persona ${o.comensales.length+1}`, v=>{ const pid=uid(); mutateOrder(x=>x.comensales.push({id:pid,nombre:v,items:[],pago:null})); UI.person=pid; });
   host.querySelectorAll("[data-add]").forEach(b=>b.onclick=()=>{ const p=Store.data.menu[b.dataset.add]; addItem({prodId:b.dataset.add, nombre:p.nombre, precio:Number(p.precio)||0}); });
   const fi=$("#freeItem"); if(fi) fi.onclick=freeItem;
+  const ci=$("#comboItem"); if(ci) ci.onclick=()=>comboBuilder(null, true);
   host.querySelectorAll("[data-inc]").forEach(b=>b.onclick=()=>changeQty(b.dataset.inc,1));
   host.querySelectorAll("[data-dec]").forEach(b=>b.onclick=()=>changeQty(b.dataset.dec,-1));
   host.querySelectorAll("[data-price]").forEach(b=>b.onclick=()=>{ if(!can("precios")){ toast("Solo gerente o administrador pueden cambiar precios"); return; } editPrice(b.dataset.price); });
@@ -671,7 +672,7 @@ function printTicket(o, ids, withEnv){
       ${e.ubicacion&&!/^https?:/i.test(e.ubicacion)?`<div>${esc(e.ubicacion)}</div>`:""}${e.referencias?`<div>Ref: ${esc(e.referencias)}</div>`:""}
       ${e.repartidor?`<div>Repartidor: ${esc(e.repartidor)}</div>`:""}<hr>`:""}
     ${people.map(p=>`<div class="b">${esc(p.nombre)}</div>
-      ${p.items.map(i=>`<div class="r"><span>${i.cant} x ${esc(i.nombre)}</span><span>${money(i.precio*i.cant)}</span></div>${i.nota?`<div>  · ${esc(i.nota)}</div>`:""}`).join("")}
+      ${p.items.map(i=>`<div class="r"><span>${i.cant} x ${esc(i.nombre)}</span><span>${money(i.precio*i.cant)}</span></div>${comboComponentes(i).length?`<div>  ${esc(comboTexto(comboComponentes(i)))}</div>`:""}${i.nota?`<div>  · ${esc(i.nota)}</div>`:""}`).join("")}
       ${people.length>1?`<div class="r b"><span>Subtotal</span><span>${money(personTotal(p))}</span></div>`:""}
       ${p.pago?`<div>Pago: ${esc(p.pago.metodo)}${p.pago.recibido?` · Recibido ${money(p.pago.recibido)}`:""}</div>`:""}<hr>`).join("")}
     ${tips?`<div class="r"><span>Propina</span><span>${money(tips)}</span></div>`:""}
@@ -695,7 +696,7 @@ function viewCocina(){
   $("#view").innerHTML=`<div class="section-title"><h2>Cocina y barra</h2></div>
     ${list.length?`<div class="kitchen">${list.map(o=>{ const items=o.comensales.flatMap(p=>p.items.filter(i=>!i.listo).map(i=>Object.assign({quien:p.nombre},i)));
       return `<div class="ktk"><div class="spread"><h3>${esc(o.nombre)}</h3><span class="muted">#${o.num} · ${hora(o.creado)}</span></div>${kindLine(o)?`<div class="kind">${kindLine(o)}</div>`:""}
-        <ul>${items.map(i=>`<li><strong>${i.cant}×</strong> ${esc(i.nombre)} <span class="muted">(${esc(i.quien)})</span>${i.nota?`<br><span style="color:var(--pink);font-weight:700">${esc(i.nota)}</span>`:""}</li>`).join("")}</ul>
+        <ul>${items.map(i=>`<li><strong>${i.cant}×</strong> ${esc(i.nombre)} <span class="muted">(${esc(i.quien)})</span>${comboComponentes(i).length?`<br><span class="muted" style="font-size:13.5px">${esc(comboTexto(comboComponentes(i)))}</span>`:""}${i.nota?`<br><span style="color:var(--pink);font-weight:700">${esc(i.nota)}</span>`:""}</li>`).join("")}</ul>
         ${can("cocina")?`<button class="btn green block" data-ready="${o.id}">Marcar como listo</button>`:`<p class="muted" style="margin:6px 0 0;font-size:14px">En preparación</p>`}</div>`;}).join("")}</div>`
     :`<div class="empty"><div class="big">Nada pendiente</div>Los pedidos enviados a cocina aparecen aquí en todos los dispositivos.</div>`}`;
   document.querySelectorAll("[data-ready]").forEach(b=>b.onclick=()=>{ const id=b.dataset.ready; const o=clone(Store.data.pedidos[id]); o.comensales.forEach(p=>p.items.forEach(i=>i.listo=true)); o.estado="listo"; Store.save("pedidos",id,o); toast(`${o.nombre} listo`); });
@@ -706,10 +707,10 @@ function viewMenu(){
   const c=cfg(); const ps=products();
   const cats=[...new Set([...(c.categorias||[]), ...ps.map(p=>p.cat).filter(Boolean)])];
   $("#view").innerHTML=`
-    <div class="section-title"><h2>Menú</h2><button class="btn primary" id="addProd">+ Producto</button></div>
+    <div class="section-title"><h2>Menú</h2><div class="row"><button class="btn ghost sm" id="addCombo">+ Combinación</button><button class="btn primary sm" id="addProd">+ Producto</button></div></div>
     ${ps.length?cats.filter(ct=>ps.some(p=>p.cat===ct)).map(ct=>`<div class="card"><h3 style="font-size:19px;margin-bottom:4px">${esc(ct)}</h3>
       ${ps.filter(p=>p.cat===ct).map(p=>`<div class="menu-item"><div class="thumb" style="${p.foto?`background-image:url('${imgSrc(p.foto)}')`:""}">${p.foto?"":esc((p.nombre||"?")[0])}</div>
-        <div><div style="font-weight:700">${esc(p.nombre)}${p.activo===false?' <span class="pill">Agotado</span>':""}</div><div class="muted" style="font-size:14px">${money(p.precio)}${p.desc?` · ${esc(p.desc)}`:""}</div></div>
+        <div><div style="font-weight:700">${esc(p.nombre)}${p.activo===false?' <span class="pill">Agotado</span>':""}</div><div class="muted" style="font-size:14px">${money(p.precio)}${p.desc?` · ${esc(p.desc)}`:""}</div>${esCombo(p)?`<div class="muted" style="font-size:13px">Incluye: ${esc(comboTexto(p.componentes||[]))}</div>`:""}</div>
         <button class="btn sm ghost" data-edit="${p.id}">Editar</button></div>`).join("")}</div>`).join("")
       :`<div class="empty"><div class="big">Aún no hay productos</div>Agrega tus sodas italianas, frappés, alitas y más con foto y precio.</div>`}
     <div class="card"><h3 style="font-size:19px">Menú impreso (fotos o PDF)</h3>
@@ -723,7 +724,8 @@ function viewMenu(){
     </div>
     <button class="btn mango block" id="prevMenu">Ver como cliente</button>`;
   $("#addProd").onclick=()=>editProduct(null);
-  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>editProduct(b.dataset.edit));
+  $("#addCombo").onclick=()=>comboBuilder(null, false);
+  document.querySelectorAll("[data-edit]").forEach(b=>b.onclick=()=>{ const p=Store.data.menu[b.dataset.edit]; esCombo(p)?comboBuilder(b.dataset.edit,false):editProduct(b.dataset.edit); });
   $("#prevMenu").onclick=previewMenu;
   $("#upFotos").onchange=async e=>{ const files=[...e.target.files]; if(!files.length) return; toast("Subiendo fotos…"); const ids=[]; for(const f of files){ try{ ids.push(await storeImage(f,1400)); }catch(err){ toast(err.message); } } const cc=cfg(); cc.menuFotos=[...(cc.menuFotos||[]),...ids]; Store.save("config","main",cc); };
   const up=$("#upPdf"); if(up) up.onchange=async e=>{ const f=e.target.files[0]; if(!f) return; toast("Subiendo PDF…"); try{ const url=await uploadFile(f,"pdf","pdf","application/pdf"); const cc=cfg(); cc.menuPdf=url; Store.save("config","main",cc); toast("PDF guardado"); }catch(err){ toast(err.message); } };
@@ -760,7 +762,7 @@ function publicMenuHTML(inline){
   return `<div class="pm">${cats.map(ct=>`<h3 style="font-size:22px;margin:18px 0 8px">${esc(ct)}</h3>${ps.filter(p=>p.cat===ct).map(p=>`
     <div style="display:grid;grid-template-columns:${p.foto?"72px ":""}1fr auto;gap:12px;align-items:center;padding:8px 0;border-bottom:1px dashed #D9CEEB">
       ${p.foto?`<img src="${src(p.foto)}" alt="" style="width:72px;height:72px;object-fit:cover;border-radius:14px">`:""}
-      <div><div style="font-weight:700">${esc(p.nombre)}</div>${p.desc?`<div style="font-size:14px;opacity:.75">${esc(p.desc)}</div>`:""}</div>
+      <div><div style="font-weight:700">${esc(p.nombre)}</div>${p.desc?`<div style="font-size:14px;opacity:.75">${esc(p.desc)}</div>`:""}${esCombo(p)?`<div style="font-size:13.5px;opacity:.75">Incluye: ${esc(comboTexto(p.componentes||[]))}</div>`:""}</div>
       <div style="font-weight:700">${money(p.precio)}</div></div>`).join("")}`).join("")}
     ${(c.menuFotos||[]).map(f=>`<img src="${src(f)}" alt="Menú" style="width:100%;border-radius:14px;margin-top:14px">`).join("")}</div>`;
 }
@@ -796,6 +798,7 @@ function viewCaja(){
     ${canalBreakdown(list)}
     <div class="card"><h3 style="font-size:19px">Lo más vendido</h3>
       ${topL.length?`<div class="table-wrap"><table><tr><th>Producto</th><th>Piezas</th><th style="text-align:right">Importe</th></tr>${topL.map(([n,v])=>`<tr><td>${esc(n)}</td><td>${v.c}</td><td style="text-align:right">${money(v.m)}</td></tr>`).join("")}</table></div>`:`<p class="muted">Sin ventas este día.</p>`}</div>
+    ${combosCard(list)}
     <div class="card"><h3 style="font-size:19px">Pedidos del día</h3>
       ${list.length?list.sort((a,b)=>b.creado-a.creado).map(o=>`<div class="spread" style="padding:6px 0;border-bottom:1px solid var(--line)"><button class="btn sm ghost" style="border:0;padding:0;text-align:left" data-open="${o.id}">#${o.num} ${esc(o.nombre)} · ${hora(o.creado)}</button><span><span class="pill ${o.estado}">${ESTADOS[o.estado]}</span> <strong>${money(orderTotal(o))}</strong></span></div>`).join(""):`<p class="muted">Sin pedidos.</p>`}</div>
     <button class="btn primary block" id="printCut">Imprimir corte</button>`;
@@ -1058,6 +1061,20 @@ function deliverFlow(id){
     $("#dok",m).onclick=()=>{ const r=parseFloat($("#drc",m).value); if(metodo==="Efectivo" && !isNaN(r) && r<pend){ toast("El monto recibido no alcanza"); return; } finish(metodo, metodo==="Efectivo"&&!isNaN(r)?r:null); closeModal(); };
   });
 }
+function combosCard(list){
+  const vend={}, piezas={};
+  list.forEach(o=>o.comensales.forEach(p=>p.items.forEach(i=>{
+    const comps=comboComponentes(i); if(!comps.length) return;
+    vend[i.nombre]=vend[i.nombre]||{c:0,m:0}; vend[i.nombre].c+=i.cant; vend[i.nombre].m+=i.cant*i.precio;
+    comps.forEach(x=>{ piezas[x.nombre]=(piezas[x.nombre]||0)+(x.cant||0)*i.cant; });
+  })));
+  const v=Object.entries(vend); if(!v.length) return "";
+  return `<div class="card"><h3 style="font-size:19px">Combinaciones vendidas</h3>
+    <div class="table-wrap"><table><tr><th>Combinación</th><th>Vendidas</th><th style="text-align:right">Importe</th></tr>
+    ${v.sort((a,b)=>b[1].c-a[1].c).map(([n,x])=>`<tr><td>${esc(n)}</td><td>${x.c}</td><td style="text-align:right">${money(x.m)}</td></tr>`).join("")}</table></div>
+    <h3 style="font-size:17px;margin-top:14px">Piezas que salieron dentro de combinaciones</h3>
+    <div class="table-wrap"><table>${Object.entries(piezas).sort((a,b)=>b[1]-a[1]).map(([n,q])=>`<tr><td>${esc(n)}</td><td style="text-align:right">${q}</td></tr>`).join("")}</table></div></div>`;
+}
 function canalBreakdown(list){
   const paid=list.filter(o=>o.estado==="pagado"); if(!paid.length) return "";
   const map={}; paid.forEach(o=>{ const k=(o.origen==="plataforma"?(o.plataforma||"Plataforma"):lbl(ORIGENES,o.origen||"presencial"))+" · "+lbl(TIPOS_PED,o.tipo||"local"); map[k]=map[k]||{n:0,v:0}; map[k].n++; map[k].v+=orderTotal(o); });
@@ -1224,6 +1241,137 @@ function bindPrivacidad(){
   document.querySelectorAll("[data-cons]").forEach(b=>b.onclick=()=>{ Store.save("config","main",Object.assign(cfg(),{conservacionMeses:+b.dataset.cons})); toast("Plazo guardado"); });
   $("#pvClean").onclick=()=>limpiarDatos(false);
   const pc=$("#pvPromoCopy"); if(pc) pc.onclick=async()=>toast(await copyText(UI.pvPromos.map(x=>`${x.tel}${x.nombre?" · "+x.nombre:""}`).join("\n"))?"Teléfonos copiados":"No se pudo copiar");
+}
+
+/* ---------- Cierre de periodo ---------- */
+function finMesPasado(){ const d=new Date(); d.setDate(0); return d.getFullYear()+"-"+String(d.getMonth()+1).padStart(2,"0")+"-"+String(d.getDate()).padStart(2,"0"); }
+function cierreCard(c){
+  const u=c.ultimoCierre;
+  return `<div class="card" id="cierreCard"><h3 style="font-size:19px">Cierre de periodo</h3>
+    <p class="muted" style="margin-top:4px">Borra los pedidos hasta la fecha que elijas. El menú, los clientes, los usuarios y los ajustes no se tocan. Descarga siempre el respaldo antes de borrar: los pedidos no se pueden recuperar.</p>
+    ${u?`<p class="muted" style="font-size:13.5px">Último cierre: ${esc(u.fecha)} · ${u.borrados} pedido(s) · por ${esc(u.por||"")} el ${new Date(u.cuando).toLocaleDateString("es-MX")}.</p>`:""}
+    <div class="field"><label for="ciF">Borrar pedidos hasta el día (incluido)</label><input id="ciF" type="date" value="${esc(UI.cierreFecha||finMesPasado())}"></div>
+    <div class="row"><button class="btn ghost sm" id="ciVer">Ver cuántos son</button><button class="btn mango sm" id="ciCsv">Descargar respaldo (CSV)</button></div>
+    <p class="muted" id="ciMsg" style="margin:8px 0 0;font-size:14px">${esc(UI.cierreMsg||"")}</p>
+    <button class="btn pink block" id="ciDel" style="margin-top:10px">Borrar pedidos de ese periodo</button>
+  </div>`;
+}
+async function cierreContar(corte){
+  const {count,error}=await sb.from("pedidos").select("id",{count:"exact",head:true}).lte("fecha",corte);
+  if(error) throw error; return count||0;
+}
+async function cierreDescargar(corte){
+  let filas=[], desde=0;
+  for(let i=0;i<50;i++){
+    const {data,error}=await sb.from("pedidos").select("data").lte("fecha",corte).order("creado",{ascending:true}).range(desde,desde+999);
+    if(error) throw error; filas=filas.concat(data.map(r=>r.data)); if(data.length<1000) break; desde+=1000;
+  }
+  const esc2=v=>`"${String(v==null?"":v).replace(/"/g,'""')}"`;
+  const out=[["Fecha","Hora","Pedido","Tipo","Origen","Mesero","Repartidor","Cuenta","Producto","Cantidad","Precio unitario","Importe","Estado","Forma de pago","Propina"].join(",")];
+  filas.forEach(o=>{
+    const f=o.fecha||"", hr=o.creado?new Date(o.creado).toLocaleTimeString("es-MX",{hour:"2-digit",minute:"2-digit"}):"";
+    (o.comensales||[]).forEach(p=>{ (p.items||[]).forEach(i=>{
+      out.push([f,hr,o.num,lbl(TIPOS_PED,o.tipo||"local"),(o.origen==="plataforma"?(o.plataforma||"Plataforma"):lbl(ORIGENES,o.origen||"presencial")),o.mesero||"",(o.entrega&&o.entrega.repartidor)||"",p.nombre,i.nombre,i.cant,i.precio,(Number(i.precio)||0)*(Number(i.cant)||0),ESTADOS[o.estado]||o.estado,(p.pago&&p.pago.metodo)||"",(p.pago&&p.pago.propina)||0].map(esc2).join(","));
+    }); });
+    if(envioCosto(o)) out.push([f,hr,o.num,lbl(TIPOS_PED,o.tipo||"local"),"","",(o.entrega&&o.entrega.repartidor)||"","","Envío a domicilio",1,envioCosto(o),envioCosto(o),ESTADOS[o.estado]||o.estado,(o.entrega&&o.entrega.envioPagado&&o.entrega.envioPagado.metodo)||"",0].map(esc2).join(","));
+  });
+  const blob=new Blob(["\ufeff"+out.join("\n")],{type:"text/csv;charset=utf-8"});
+  const a=document.createElement("a"); a.href=URL.createObjectURL(blob); a.download=`bubamania-pedidos-hasta-${corte}.csv`; a.click();
+  setTimeout(()=>URL.revokeObjectURL(a.href),4000);
+  return filas.length;
+}
+function bindCierre(){
+  if(!$("#cierreCard")) return;
+  const corte=()=>$("#ciF").value;
+  const msg=t=>{ UI.cierreMsg=t; const e=$("#ciMsg"); if(e) e.textContent=t; };
+  $("#ciF").onchange=()=>{ UI.cierreFecha=corte(); UI.cierreDescargado=null; msg(""); };
+  $("#ciVer").onclick=async()=>{ msg("Contando…"); try { msg(`${await cierreContar(corte())} pedido(s) hasta el ${corte()}.`); } catch(e){ msg("No se pudo consultar."); } };
+  $("#ciCsv").onclick=async()=>{ msg("Preparando respaldo…");
+    try { const n=await cierreDescargar(corte()); UI.cierreDescargado=corte(); msg(`Respaldo descargado con ${n} pedido(s). Guárdalo antes de borrar.`); }
+    catch(e){ msg("No se pudo descargar el respaldo."); } };
+  $("#ciDel").onclick=async()=>{
+    const f=corte(); if(!f){ toast("Elige una fecha"); return; }
+    let n; try { n=await cierreContar(f); } catch(e){ toast("No se pudo consultar"); return; }
+    if(!n){ msg("No hay pedidos en ese periodo."); return; }
+    if(UI.cierreDescargado!==f && !confirm("Todavía no descargas el respaldo de este periodo. ¿Continuar de todos modos?")) return;
+    modal(`<h3>Borrar ${n} pedido(s)</h3>
+      <p>Se borrarán todos los pedidos hasta el <strong>${esc(f)}</strong>. Los cortes de caja de esos días dejarán de estar disponibles y no se pueden recuperar.</p>
+      <div class="field"><label for="ciW">Escribe BORRAR para confirmar</label><input id="ciW" autocomplete="off" placeholder="BORRAR"></div>
+      <button class="btn pink block" id="ciOk">Borrar definitivamente</button>`, m=>{
+      $("#ciOk",m).onclick=async()=>{
+        if($("#ciW",m).value.trim().toUpperCase()!=="BORRAR"){ toast("Escribe BORRAR para confirmar"); return; }
+        const b=$("#ciOk",m); b.disabled=true; b.textContent="Borrando…";
+        const {error}=await sb.from("pedidos").delete().lte("fecha",f);
+        if(error){ toast(friendlyErr(error)); b.disabled=false; b.textContent="Borrar definitivamente"; return; }
+        Store.save("config","main",Object.assign(cfg(),{ultimoCierre:{fecha:f, borrados:n, por:Store.userName, cuando:Date.now()}}));
+        await Store.load().catch(()=>{}); closeModal(); msg(`Se borraron ${n} pedido(s) hasta el ${f}.`); toast("Cierre realizado"); render();
+      };
+    });
+  };
+}
+
+/* ---------- Combinaciones ---------- */
+const esCombo = p => !!(p && p.tipo==="combo");
+function comboComponentes(item){
+  if (item && item.componentes && item.componentes.length) return item.componentes;
+  const p = item && item.prodId ? Store.data.menu[item.prodId] : null;
+  return (p && p.componentes) || [];
+}
+const comboTexto = comps => comps.map(x=>`${x.cant}× ${x.nombre}`).join(", ");
+function comboBuilder(id, enPedido){
+  const c=cfg();
+  const base = id ? Object.assign({}, Store.data.menu[id]) : {nombre:"", precio:"", cat:"Combinaciones", desc:"", foto:"", activo:true, tipo:"combo", componentes:[], orden:products().length};
+  let comp = clone(base.componentes) || [], foto = base.foto, manual = !!id;
+  const sueltos = products().filter(p=>!esCombo(p));
+  const cats = [...new Set([...(c.categorias||[]), "Combinaciones", ...products().map(x=>x.cat).filter(Boolean)])];
+  const suma = () => comp.reduce((s,x)=>s+(Number(x.precio)||0)*(Number(x.cant)||0), 0);
+  modal(`<h3>${id?"Editar combinación":"Nueva combinación"}</h3>
+    <p class="muted" style="margin-top:0">Junta varios productos y cóbralos a un precio propio.</p>
+    <div class="row" style="align-items:flex-start;flex-wrap:nowrap;margin-bottom:12px">
+      <div class="thumb" id="cbF" style="width:76px;height:76px;flex:none;${foto?`background-image:url('${imgSrc(foto)}')`:""}">${foto?"":"+"}</div>
+      <label class="btn ghost sm">${foto?"Cambiar foto":"Agregar foto"}<input type="file" accept="image/*" id="cbFi" class="hidden"></label>
+    </div>
+    <div class="field"><label for="cbN">Nombre</label><input id="cbN" value="${esc(base.nombre)}" placeholder="Combo Buba" autocomplete="off"></div>
+    <div class="field"><label>¿Qué incluye?</label><div id="cbL"></div>
+      <div class="row" style="flex-wrap:nowrap;margin-top:6px"><select id="cbSel"><option value="">Elige un producto…</option>${sueltos.map(p=>`<option value="${p.id}">${esc(p.nombre)} · ${money(p.precio)}</option>`).join("")}</select><button class="btn ghost" id="cbAdd">Agregar</button></div></div>
+    <div class="dres" id="cbR"></div>
+    <div class="field"><label for="cbP">Precio de la combinación</label><input id="cbP" type="number" inputmode="decimal" step="0.5" value="${esc(base.precio)}"></div>
+    <div class="field"><label for="cbC">Categoría</label><select id="cbC">${cats.map(ct=>`<option ${ct===base.cat?"selected":""}>${esc(ct)}</option>`).join("")}</select></div>
+    <div class="field"><label for="cbD">Descripción (se ve en el menú del cliente)</label><input id="cbD" value="${esc(base.desc||"")}" placeholder="Ideal para compartir"></div>
+    <div class="field"><label><input type="checkbox" id="cbA" style="width:auto" ${base.activo!==false?"checked":""}> Disponible</label></div>
+    ${enPedido?`<div class="field"><label><input type="checkbox" id="cbG" style="width:auto" checked> Guardarla también en el menú para reutilizarla</label></div>
+      <button class="btn primary block" id="cbOk">Agregar a la cuenta</button>`
+      :`<button class="btn primary block" id="cbOk">Guardar combinación</button>`}
+    ${id?`<button class="btn ghost block" id="cbDel" style="margin-top:8px;color:var(--pink)">Eliminar combinación</button>`:""}`, m=>{
+    const pinta=()=>{
+      $("#cbL",m).innerHTML = comp.length ? comp.map((x,i)=>`<div class="line" style="grid-template-columns:auto 1fr auto"><div class="qty"><button data-cm="${i}">−</button><span>${x.cant}</span><button data-cp="${i}">+</button></div><div class="nm">${esc(x.nombre)}</div><span class="muted">${money((Number(x.precio)||0)*x.cant)}</span></div>`).join("") : `<p class="muted" style="margin:4px 0">Aún no agregas productos.</p>`;
+      const s=suma(), p=Number($("#cbP",m).value)||0;
+      $("#cbR",m).innerHTML = comp.length ? `Por separado: <strong>${money(s)}</strong>${p>0?` · Precio de la combinación: <strong>${money(p)}</strong> · ${p<s?`Ahorro de ${money(s-p)}`:p>s?`${money(p-s)} más`:"mismo precio"}`:""}` : `<span class="muted">Agrega productos para ver la suma</span>`;
+      m.querySelectorAll("[data-cm]").forEach(b=>b.onclick=()=>{ const i=+b.dataset.cm; comp[i].cant--; if(comp[i].cant<=0) comp.splice(i,1); if(!manual) $("#cbP",m).value=suma(); pinta(); });
+      m.querySelectorAll("[data-cp]").forEach(b=>b.onclick=()=>{ comp[+b.dataset.cp].cant++; if(!manual) $("#cbP",m).value=suma(); pinta(); });
+    };
+    $("#cbAdd",m).onclick=()=>{ const v=$("#cbSel",m).value; if(!v) return; const p=Store.data.menu[v];
+      const ex=comp.find(x=>x.prodId===v); if(ex) ex.cant++; else comp.push({prodId:v, nombre:p.nombre, precio:Number(p.precio)||0, cant:1});
+      if(!manual) $("#cbP",m).value=suma(); $("#cbSel",m).value=""; pinta(); };
+    $("#cbP",m).oninput=()=>{ manual=true; pinta(); };
+    $("#cbFi",m).onchange=async e=>{ const f=e.target.files[0]; if(!f) return; $("#cbF",m).textContent="…";
+      try { foto=await storeImage(f); $("#cbF",m).style.backgroundImage=`url('${imgSrc(foto)}')`; $("#cbF",m).textContent=""; } catch(err){ toast(err.message); $("#cbF",m).textContent="+"; } };
+    pinta();
+    $("#cbOk",m).onclick=()=>{
+      const nombre=$("#cbN",m).value.trim(), precio=parseFloat($("#cbP",m).value), cat=$("#cbC",m).value;
+      if(!nombre || isNaN(precio)){ toast("Escribe nombre y precio"); return; }
+      if(!comp.length){ toast("Agrega al menos un producto a la combinación"); return; }
+      const datos = Object.assign(base, {nombre, precio, cat, desc:$("#cbD",m).value.trim(), foto, activo:$("#cbA",m).checked, tipo:"combo", componentes:comp});
+      const guardar = !enPedido || $("#cbG",m).checked;
+      let prodId = id || null;
+      if (guardar){ prodId = id || uid();
+        if (cat==="Combinaciones" && !(cfg().categorias||[]).includes("Combinaciones")) Store.save("config","main",Object.assign(cfg(),{categorias:[...(cfg().categorias||[]),"Combinaciones"]}));
+        Store.save("menu", prodId, datos); }
+      if (enPedido) addItem({prodId, nombre, precio, componentes:comp, editado:!guardar});
+      closeModal(); toast(enPedido ? "Combinación agregada" : "Combinación guardada");
+    };
+    const d=$("#cbDel",m); if(d) d.onclick=()=>{ if(confirm(`¿Eliminar “${base.nombre}”?`)){ Store.remove("menu", id); closeModal(); } };
+  });
 }
 
 /* ---------- Mi cuenta y usuarios ---------- */
@@ -1415,8 +1563,8 @@ function viewAjustes(){
     </div>
     <div class="card"><h3 style="font-size:19px">Datos</h3>
       <p class="muted" style="margin-top:4px">Sesión: ${esc(Store.userName?Store.userName+" · ":"")}${esc(Store.userEmail)}. Los pedidos y el menú se sincronizan en vivo entre todos los dispositivos.</p>
-      <div class="row"><button class="btn ghost" id="purge">Borrar pedidos de hace más de 30 días</button></div>
     </div>
+    ${cierreCard(c)}
     <p class="muted" style="text-align:center;font-size:14px">BubaManía versión ${APP_VERSION} · <a href="manual.html" target="_blank" rel="noopener">Manual de uso</a></p>`;
   const saveCfg=patch=>Store.save("config","main",Object.assign(cfg(),patch));
   $("#wadd").onclick=()=>{ const n=$("#wn").value.trim(); if(!n) return; const ms=cfg().meseros||[]; if(ms.includes(n)){ toast("Ya existe"); return; } saveCfg({meseros:[...ms,n]}); toast(`${n} agregado`); };
@@ -1439,7 +1587,7 @@ function viewAjustes(){
     $("#print").innerHTML=`<div style="text-align:center;font-family:Fredoka,sans-serif;color:#2B1745;padding:20px"><div style="font-size:40px;font-weight:700">${esc(cfg().negocio)}</div><div style="font-size:20px;margin:6px 0 16px">Escanea y mira nuestro menú</div><img src="${s}" style="width:70mm;height:70mm"></div>`; setTimeout(()=>window.print(),60); };
   setTimeout(()=>drawQR(c.qrUrl||publicMenuUrl()),0);
   $("#logout").onclick=async()=>{ if(!confirm("¿Cerrar sesión en este dispositivo?")) return; await sb.auth.signOut(); location.reload(); };
-  $("#purge").onclick=()=>{ const lim=Date.now()-30*864e5; const old=orders().filter(o=>o.creado<lim && (o.estado==="pagado"||o.estado==="cancelado")); if(!old.length){ toast("No hay pedidos antiguos"); return; } if(!confirm(`Se borrarán ${old.length} pedidos antiguos. ¿Continuar?`)) return; old.forEach(o=>Store.remove("pedidos",o.id)); toast("Pedidos antiguos borrados"); };
+  bindCierre();
 }
 
 /* ---------- Modales ---------- */

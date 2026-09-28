@@ -77,7 +77,7 @@ const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/
   document.getElementById("cats").innerHTML=cats.map(ct=>`<a href="#${slug(ct)}">${esc(ct)}</a>`).join("");
   document.getElementById("menu").innerHTML=cats.map(ct=>`<h2 id="${slug(ct)}">${esc(ct)}</h2>`+ps.filter(p=>p.cat===ct).map(p=>`
     <div class="item ${p.activo===false?"off":""}">${p.foto?`<img src="${esc(p.foto)}" alt="" loading="lazy">`:"<span></span>"}
-      <div><div class="n">${esc(p.nombre)}</div>${p.desc?`<div class="d">${esc(p.desc)}</div>`:""}${p.activo===false?`<div class="d">Agotado por hoy</div>`:""}</div>
+      <div><div class="n">${esc(p.nombre)}</div>${p.desc?`<div class="d">${esc(p.desc)}</div>`:""}${p.tipo==="combo"&&p.componentes?`<div class="d">Incluye: ${esc(p.componentes.map(x=>x.cant+"× "+x.nombre).join(", "))}</div>`:""}${p.activo===false?`<div class="d">Agotado por hoy</div>`:""}</div>
       <div class="p">${money(p.precio)}</div></div>`).join("")).join("") || `<p class="muted">Pronto publicaremos nuestro menú.</p>`;
   document.getElementById("gal").innerHTML=(cfg.menuFotos||[]).filter(f=>/^https?:/.test(f)).map(f=>`<img src="${esc(f)}" alt="Menú impreso" loading="lazy">`).join("");
   if(cfg.menuPdf&&/^https?:/.test(cfg.menuPdf)) document.getElementById("pdf").innerHTML=`<a class="pdf" href="${esc(cfg.menuPdf)}" target="_blank" rel="noopener">Ver menú en PDF</a>`;
