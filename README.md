@@ -1,4 +1,4 @@
-# BubaManía · versión 1.5.2
+# BubaManía · versión 1.6.0
 
 App de pedidos (en local, para llevar y a domicilio), cuentas por persona, meseros, propinas, reparto, cocina, caja, menú con QR y tickets.
 
@@ -6,6 +6,7 @@ App de pedidos (en local, para llevar y a domicilio), cuentas por persona, meser
 - `aviso-privacidad.html`: aviso de privacidad público (se enlaza desde el menú, el ticket y WhatsApp).
 - `logo.jpg`, `favicon.png`, `icon-192.png`, `icon-512.png`: logotipo e íconos.
 - `menu.html`: menú público para clientes (el QR apunta aquí).
+- `menu-pdf.html`: el mismo menú en hojas tamaño carta, para guardarlo como PDF e imprimirlo o subirlo a Google.
 - `config.js`: aquí van la URL y la clave pública de Supabase.
 - `supabase/schema.sql`: base de datos completa (instalación nueva).
 - `supabase/migracion-1.1.sql` a `1.4`: solo para actualizar instalaciones anteriores.
@@ -115,6 +116,12 @@ Edita o vuelve a subir `index.html` o `menu.html` en GitHub. Los productos, prec
 - En el plan gratuito de Supabase, los proyectos sin actividad por un tiempo pueden pausarse. Revisa las condiciones vigentes en supabase.com/pricing.
 
 ## Historial de versiones
+
+**1.6.0**
+- Nueva página `menu-pdf.html`: arma el menú en hojas tamaño carta con el fondo de agua, calcula solo cuántas páginas hacen falta y se guarda como PDF desde el propio celular.
+- Botón **Menú en PDF** en Ajustes → Código QR del menú.
+- Sirve para subir el menú al Perfil de Negocio de Google (Menú → Fotos del menú) y para imprimirlo.
+- Incluye la opción **Con fotos / Solo texto**.
 
 **1.5.2**
 - El menú público deja fijos el logo y el nombre en la barra superior al bajar; al tocarlos se regresa al inicio.

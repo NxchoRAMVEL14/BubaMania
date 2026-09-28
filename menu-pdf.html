@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Menú para imprimir · BubaManía</title>
+<link rel="icon" href="favicon.png" type="image/png">
+<meta name="theme-color" content="#062E6F">
+<meta name="color-scheme" content="light">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="config.js?v=1.6.0"></script>
+<script>
+(function(){ var c=window.BUBA_CONFIG||{};
+  if(!c.url || !c.anonKey || /TU-PROYECTO|PEGA_AQUI/.test(c.url+c.anonKey))
+    window.BUBA_CONFIG={ url:"https://mcnhiivarnywbsptwvto.supabase.co", anonKey:"sb_publishable_CA8tx2nZrldjUADkvqhXKA_IHb47pzI" };
+})();
+</script>
+<style>
+:root{--deep:#062E6F;--precio:#0B4FA0;--ink:#0E2340;--muted:#41618A;
+  --panel:rgba(255,255,255,.9);--borde:rgba(255,255,255,.85);--naranja:#E8760C;box-sizing:border-box}
+*,*::before,*::after{box-sizing:inherit}
+body{margin:0;background:#E7ECF3;color:var(--ink);
+  font-family:"DM Sans",system-ui,-apple-system,Segoe UI,Roboto,sans-serif;line-height:1.4}
+h1,h2,.precio,.folio{font-family:"Fredoka","DM Sans",system-ui,sans-serif;font-weight:600;margin:0}
+
+/* ---------- Barra de control (no se imprime) ---------- */
+.control{position:sticky;top:0;z-index:9;background:#0B2A5B;color:#fff;padding:12px 16px;
+  display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.control .t{font-family:Fredoka,sans-serif;font-size:19px;font-weight:600;margin-right:auto}
+.control button{font:inherit;font-weight:700;border:0;border-radius:999px;padding:10px 18px;cursor:pointer}
+.btn1{background:var(--naranja);color:#fff}
+.btn2{background:rgba(255,255,255,.16);color:#fff}
+.btn2[aria-pressed="true"]{background:#fff;color:#0B2A5B}
+.pista{background:#12356E;color:#D7E4F7;font-size:14px;padding:10px 16px;line-height:1.5}
+.pista b{color:#fff}
+
+/* ---------- Hojas tamaño carta ---------- */
+#hojas{padding:20px 10px 40px;display:flex;flex-direction:column;align-items:center;gap:20px}
+.hoja{width:816px;height:1056px;position:relative;overflow:hidden;background:#0B4FA0;
+  box-shadow:0 8px 28px rgba(11,42,91,.28);flex:none;
+  transform-origin:top center}
+.agua{position:absolute;inset:0;
+  background:linear-gradient(180deg,#052869 0%,#0B4FA0 24%,#1179C4 46%,#14A5A2 70%,#6FBE3F 100%)}
+.luz{position:absolute;inset:0;opacity:.45;
+  background:linear-gradient(196deg,rgba(255,255,255,.34) 0 4%,transparent 4.6%),
+             linear-gradient(174deg,rgba(255,255,255,.2) 0 3%,transparent 3.6%),
+             linear-gradient(203deg,rgba(255,255,255,.15) 0 6%,transparent 6.8%);
+  background-position:16% 0,58% 0,82% 0;background-repeat:no-repeat}
+.bu{position:absolute;border-radius:50%;
+  background:radial-gradient(circle at 32% 28%,rgba(255,255,255,.9),rgba(255,255,255,.3) 42%,rgba(255,255,255,.08) 62%,transparent 70%);
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.28)}
+.dentro{position:absolute;inset:0;padding:46px 46px 40px;display:flex;flex-direction:column}
+
+.cabeza{display:flex;gap:18px;align-items:center;color:#fff;margin-bottom:18px;
+  text-shadow:0 2px 10px rgba(3,22,54,.45)}
+.cabeza img{width:104px;height:104px;border-radius:50%;object-fit:cover;flex:none;
+  border:3px solid rgba(255,255,255,.9)}
+.cabeza h1{font-size:44px;font-weight:700;line-height:1.02}
+.cabeza p{margin:4px 0 0;font-size:16px;color:rgba(255,255,255,.9)}
+
+.tarjeta{background:var(--panel);border:1.5px solid var(--borde);border-radius:22px;
+  padding:11px 18px 7px;margin-bottom:13px}
+.tarjeta h2{font-size:24px;text-align:center;color:var(--deep);margin:1px 0 8px}
+.lista{columns:2;column-gap:24px}
+.item{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center;
+  padding:5.5px 0;border-bottom:1.5px dashed rgba(11,79,160,.26);break-inside:avoid}
+.item img{width:52px;height:52px;object-fit:cover;border-radius:11px;display:block}
+.item .n{font-weight:700;font-size:14.5px;line-height:1.25}
+.item .d{font-size:12.5px;color:var(--muted);line-height:1.3}
+.item .precio{font-size:16px;color:var(--precio)}
+.item.off{opacity:.55}
+
+.pie{margin-top:auto;display:flex;justify-content:space-between;align-items:center;
+  color:#fff;font-size:13px;text-shadow:0 1px 6px rgba(3,22,54,.5)}
+.folio{font-size:14px}
+
+/* ---------- Impresión ---------- */
+@page{size:letter portrait;margin:0}
+@media print{
+  html,body{background:#fff}
+  .control,.pista{display:none!important}
+  #hojas{padding:0;gap:0;display:block}
+  .hoja{box-shadow:none;margin:0;transform:none!important;break-after:page;page-break-after:always}
+  .hoja:last-child{break-after:auto;page-break-after:auto}
+  *{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+#medidor{position:absolute;left:-9999px;top:0;width:724px;visibility:hidden}
+</style>
+</head>
+<body>
+
+<div class="control">
+  <span class="t">Menú para imprimir</span>
+  <button class="btn2" id="bFotos" aria-pressed="true">Con fotos</button>
+  <button class="btn1" id="bPdf">Guardar como PDF</button>
+</div>
+<p class="pista">
+  Toca <b>Guardar como PDF</b>. En el cuadro de impresión elige <b>Guardar como PDF</b> y,
+  si aparece la opción, activa <b>Gráficos de fondo</b> para que salga el fondo de agua.
+  Ese archivo es el que subes a tu Perfil de Negocio de Google, en <b>Menú → Fotos del menú</b>.
+</p>
+
+<div id="hojas"><p style="text-align:center;color:#41618A;padding:40px">Cargando menú…</p></div>
+<div id="medidor"></div>
+
+<script>
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>{ const v=Number(n)||0; if(v===0) return "Gratis";
+  return new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",
+    minimumFractionDigits:Number.isInteger(v)?0:2}).format(v); };
+const ALTO=1056, ANCHO=816, PAD=46, PIE=34, UTIL=ALTO-PAD*2-PIE;
+let DATOS=null, CON_FOTOS=true;
+
+/* Burbujas decorativas, distintas en cada hoja pero siempre iguales al reimprimir */
+function burbujas(n){
+  let s=""; let x=(n+1)*9301;
+  const r=()=>{ x=(x*9301+49297)%233280; return x/233280; };
+  for(let i=0;i<11;i++){
+    const d=6+Math.round(r()*26);
+    s+=`<span class="bu" style="left:${(r()*96).toFixed(1)}%;top:${(r()*96).toFixed(1)}%;width:${d}px;height:${d}px"></span>`;
+  }
+  return s;
+}
+function itemHTML(p){
+  const foto = CON_FOTOS && p.foto ? `<img src="${esc(p.foto)}" alt="" crossorigin="anonymous">` : "<span></span>";
+  const inc = p.tipo==="combo"&&p.componentes ? `<div class="d">Incluye: ${esc(p.componentes.map(x=>x.cant+"× "+x.nombre).join(", "))}</div>` : "";
+  return `<div class="item ${p.activo===false?"off":""}">${foto}
+    <div><div class="n">${esc(p.nombre)}</div>${p.desc?`<div class="d">${esc(p.desc)}</div>`:""}${inc}${p.activo===false?`<div class="d">Agotado por hoy</div>`:""}</div>
+    <div class="precio">${money(p.precio)}</div></div>`;
+}
+function tarjeta(titulo, productos, cont){
+  const d=document.createElement("section"); d.className="tarjeta";
+  d.innerHTML=`<h2>${esc(titulo)}${cont?" (continúa)":""}</h2><div class="lista">${productos.map(itemHTML).join("")}</div>`;
+  return d;
+}
+const medidor=document.getElementById("medidor");
+function alto(el){ medidor.appendChild(el); const h=el.offsetHeight; medidor.removeChild(el); return h; }
+
+function construir(){
+  const {cfg, cats, ps}=DATOS;
+  const cont=document.getElementById("hojas"); cont.innerHTML="";
+  const hojas=[]; let hoja=null, libre=0;
+  const nuevaHoja=()=>{
+    const h=document.createElement("div"); h.className="hoja";
+    h.innerHTML=`<div class="agua"></div><div class="luz"></div>${burbujas(hojas.length)}<div class="dentro"></div>`;
+    hojas.push(h); cont.appendChild(h);
+    hoja=h.querySelector(".dentro"); libre=UTIL;
+    return h;
+  };
+  nuevaHoja();
+  // Encabezado solo en la primera hoja
+  const cab=document.createElement("div"); cab.className="cabeza";
+  cab.innerHTML=`<img src="logo.jpg" alt=""><div><h1>${esc(cfg.negocio||"BubaManía")}</h1>
+    <p>${esc(cfg.direccion||"Explosión de sabor")}</p></div>`;
+  const hCab=alto(cab); hoja.appendChild(cab); libre-=hCab+18;
+
+  cats.forEach(ct=>{
+    let pend=ps.filter(p=>p.cat===ct); let primera=true;
+    while(pend.length){
+      let n=pend.length, t=tarjeta(ct,pend.slice(0,n),!primera), ht=alto(t);
+      if(ht>libre){
+        // cuántos productos caben en el espacio que queda
+        n=0;
+        while(n<pend.length){
+          if(alto(tarjeta(ct,pend.slice(0,n+2),!primera))>libre) break;
+          n+=2;
+        }
+        const vacia = libre>=UTIL-1;              // ya estamos en una hoja nueva
+        if(n<4 && !vacia){ nuevaHoja(); continue; }
+        if(n<2) n=2;                              // evita quedarse atorado
+        n=Math.min(n,pend.length);
+        t=tarjeta(ct,pend.slice(0,n),!primera); ht=alto(t);
+      }
+      hoja.appendChild(t); libre-=ht+13;
+      pend=pend.slice(n); primera=false;
+      if(pend.length) nuevaHoja();
+    }
+  });
+  const hoy=new Date().toLocaleDateString("es-MX",{day:"numeric",month:"long",year:"numeric"});
+  hojas.forEach((h,i)=>{
+    const p=document.createElement("div"); p.className="pie";
+    p.innerHTML=`<span>${esc(cfg.negocio||"BubaManía")} · menú actualizado el ${hoy}</span>
+      <span class="folio">${i+1} / ${hojas.length}</span>`;
+    h.querySelector(".dentro").appendChild(p);
+  });
+  escalar();
+}
+/* En pantalla, la hoja se encoge para caber en el celular */
+function escalar(){
+  const k=Math.min(1,(document.getElementById("hojas").clientWidth-20)/ANCHO);
+  document.querySelectorAll(".hoja").forEach(h=>{
+    h.style.transform = k<1 ? `scale(${k})` : "";
+    h.style.marginBottom = k<1 ? `${-(ALTO*(1-k))+20}px` : "";
+  });
+}
+addEventListener("resize", escalar);
+
+document.getElementById("bPdf").onclick=()=>window.print();
+document.getElementById("bFotos").onclick=e=>{
+  CON_FOTOS=!CON_FOTOS;
+  e.currentTarget.setAttribute("aria-pressed",String(CON_FOTOS));
+  e.currentTarget.textContent=CON_FOTOS?"Con fotos":"Solo texto";
+  if(DATOS) construir();
+};
+
+(async()=>{
+  const C=window.BUBA_CONFIG||{}; const cont=document.getElementById("hojas");
+  if(!window.supabase||!C.url){ cont.innerHTML=`<p style="padding:40px;text-align:center">Falta la configuración de Supabase.</p>`; return; }
+  const sb=window.supabase.createClient(C.url,C.anonKey);
+  const [m,c]=await Promise.all([sb.from("menu").select("id,data"), sb.from("config").select("data").eq("id",1).maybeSingle()]);
+  if(m.error){ cont.innerHTML=`<p style="padding:40px;text-align:center">No se pudo cargar el menú.</p>`; return; }
+  const cfg=(c.data&&c.data.data)||{};
+  document.title="Menú para imprimir · "+(cfg.negocio||"BubaManía");
+  const ps=m.data.map(r=>Object.assign({id:r.id},r.data))
+    .sort((a,b)=>(a.orden??0)-(b.orden??0)||String(a.nombre).localeCompare(b.nombre));
+  const cats=[...new Set([...(cfg.categorias||[]),...ps.map(p=>p.cat)])].filter(ct=>ps.some(p=>p.cat===ct));
+  DATOS={cfg,cats,ps};
+  construir();
+  // Espera a que carguen las fotos para que la paginación quede exacta
+  await Promise.all([...document.images].map(i=>i.complete?null:new Promise(r=>{i.onload=i.onerror=r})));
+  construir();
+})();
+</script>
+</body>
+</html>

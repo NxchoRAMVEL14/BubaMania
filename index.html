@@ -250,7 +250,7 @@ body:not(.locked) #login{display:none}
 <div id="print"></div>
 
 <script>
-const APP_VERSION = "1.5.2";
+const APP_VERSION = "1.6.0";
 /* ---------- Utilidades ---------- */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -1580,7 +1580,9 @@ function viewAjustes(){
     ${mejorasCard()}
     <div class="card"><h3 style="font-size:19px">Código QR del menú</h3>
       <p class="muted" style="margin-top:4px">El QR abre tu menú público, que se actualiza solo cuando cambias productos o precios.</p>
-      <a class="btn mango" href="menu.html" target="_blank" rel="noopener">Abrir menú público</a>
+      <div class="row"><a class="btn mango" href="menu.html" target="_blank" rel="noopener">Abrir menú público</a>
+        <a class="btn ghost" href="menu-pdf.html" target="_blank" rel="noopener">Menú en PDF</a></div>
+      <p class="muted" style="font-size:13.5px;margin:8px 0 0">El <strong>Menú en PDF</strong> arma el menú en hojas tamaño carta, con el mismo fondo, para subirlo a tu Perfil de Negocio de Google (Menú → Fotos del menú) o para imprimirlo.</p>
       <div class="field" style="margin-top:12px"><label for="aq">Enlace del menú público</label><input id="aq" type="url" value="${esc(c.qrUrl||publicMenuUrl())}"></div>
       <div class="row"><button class="btn primary" id="genqr">Generar QR</button><button class="btn ghost" id="prqr">Imprimir QR</button></div>
       <div style="margin-top:12px" id="qrWrap"><div id="qrbox"></div></div>
