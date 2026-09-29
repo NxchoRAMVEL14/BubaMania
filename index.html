@@ -17,7 +17,7 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js?v=1.4.1"></script>
+<script src="config.js?v=1.6.1"></script>
 <script>
 /* Respaldo: si config.js falta, está en caché o trae valores de ejemplo, se usan los datos de BubaManía */
 (function(){ var c=window.BUBA_CONFIG||{};
@@ -250,7 +250,7 @@ body:not(.locked) #login{display:none}
 <div id="print"></div>
 
 <script>
-const APP_VERSION = "1.6.0";
+const APP_VERSION = "1.6.1";
 /* ---------- Utilidades ---------- */
 const $ = (s, r=document) => r.querySelector(s);
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -363,7 +363,7 @@ async function storeImage(file, max=640){
 
 /* ---------- Estado de la UI ---------- */
 const UI = { tab:"pedidos", openOrder:null, person:null, cat:null };
-const cfg = () => Object.assign({ negocio:"BubaManía", papel:"80", pie:"¡Gracias por tu visita!", qrUrl:"", categorias:DEFAULT_CATS, menuFotos:[], menuPdf:"", meseros:[], propinaModo:"individual", repartidores:[], plataformas:["Didi Food","Uber Eats","Rappi"], local:null, prepMin:15, envio:{gratisHastaKm:3, cargoFijo:15, cargoPorKm:5} }, Store.data.config||{});
+const cfg = () => Object.assign({ negocio:"BubaManía", papel:"80", pie:"¡Gracias por tu visita!", qrUrl:"", whatsappPedidos:"", categorias:DEFAULT_CATS, menuFotos:[], menuPdf:"", meseros:[], propinaModo:"individual", repartidores:[], plataformas:["Didi Food","Uber Eats","Rappi"], local:null, prepMin:15, envio:{gratisHastaKm:3, cargoFijo:15, cargoPorKm:5} }, Store.data.config||{});
 function myFilter(){ try { return localStorage.getItem("buba-filtro-mesero") || ""; } catch(e){ return ""; } }
 function setMyFilter(v){ try { localStorage.setItem("buba-filtro-mesero", v); } catch(e){} }
 function defaultWaiter(){ const ms=cfg().meseros||[]; const f=myFilter(); if (f && ms.includes(f)) return f; if (ms.includes(Store.userName)) return Store.userName; return ms[0]||""; }
@@ -1561,6 +1561,7 @@ function viewAjustes(){
       <div class="field"><label for="an">Nombre del negocio</label><input id="an" value="${esc(c.negocio)}"></div>
       <div class="field"><label for="ad">Dirección o teléfono (sale en el ticket)</label><input id="ad" value="${esc(c.direccion||"")}"></div>
       <div class="field"><label for="ap">Mensaje al final del ticket</label><input id="ap" value="${esc(c.pie)}"></div>
+      <div class="field"><label for="awa">WhatsApp para pedidos a domicilio</label><input id="awa" value="${esc(c.whatsappPedidos||"")}" placeholder="476 113 4044"><p class="muted" style="font-size:13px;margin:5px 0 0">Aparece como botón en el menú del cliente y en el menú en PDF. Escribe los 10 dígitos o pega el enlace completo de wa.me. Si lo dejas vacío se usa el 476 113 4044.</p></div>
       <div class="field"><label>Ancho del papel de la impresora</label><div class="seg" id="paper">${["58","80"].map(w=>`<button data-w="${w}" aria-pressed="${c.papel===w}">${w} mm</button>`).join("")}</div></div>
       <button class="btn primary" id="as">Guardar ajustes</button>
       <button class="btn ghost" id="atest">Imprimir ticket de prueba</button>
@@ -1582,7 +1583,7 @@ function viewAjustes(){
       <p class="muted" style="margin-top:4px">El QR abre tu menú público, que se actualiza solo cuando cambias productos o precios.</p>
       <div class="row"><a class="btn mango" href="menu.html" target="_blank" rel="noopener">Abrir menú público</a>
         <a class="btn ghost" href="menu-pdf.html" target="_blank" rel="noopener">Menú en PDF</a></div>
-      <p class="muted" style="font-size:13.5px;margin:8px 0 0">El <strong>Menú en PDF</strong> arma el menú en hojas tamaño carta, con el mismo fondo, para subirlo a tu Perfil de Negocio de Google (Menú → Fotos del menú) o para imprimirlo.</p>
+      <p class="muted" style="font-size:13.5px;margin:8px 0 0">El <strong>Menú en PDF</strong> arma el menú en hojas tamaño carta, con el mismo fondo, para subirlo a tu Perfil de Negocio de Google (Menú → Fotos del menú) o para imprimirlo. Los dos menús llevan arriba el botón de <strong>Pedidos a domicilio por WhatsApp</strong> con el número que pusiste en Ajustes.</p>
       <div class="field" style="margin-top:12px"><label for="aq">Enlace del menú público</label><input id="aq" type="url" value="${esc(c.qrUrl||publicMenuUrl())}"></div>
       <div class="row"><button class="btn primary" id="genqr">Generar QR</button><button class="btn ghost" id="prqr">Imprimir QR</button></div>
       <div style="margin-top:12px" id="qrWrap"><div id="qrbox"></div></div>
@@ -1605,7 +1606,7 @@ function viewAjustes(){
   document.querySelectorAll("[data-modo]").forEach(b=>b.onclick=()=>{ setDeviceMode(b.dataset.modo); toast("Listo. Este celular muestra: "+b.textContent); render(); });
   let papel=c.papel;
   document.querySelectorAll("[data-w]").forEach(b=>b.onclick=()=>{ papel=b.dataset.w; document.querySelectorAll("[data-w]").forEach(x=>x.setAttribute("aria-pressed",x===b)); });
-  $("#as").onclick=()=>{ Store.save("config","main",Object.assign(cfg(),{negocio:$("#an").value.trim()||"BubaManía",direccion:$("#ad").value.trim(),pie:$("#ap").value.trim(),papel,qrUrl:$("#aq").value.trim()})); toast("Ajustes guardados"); };
+  $("#as").onclick=()=>{ Store.save("config","main",Object.assign(cfg(),{negocio:$("#an").value.trim()||"BubaManía",direccion:$("#ad").value.trim(),pie:$("#ap").value.trim(),papel,qrUrl:$("#aq").value.trim(),whatsappPedidos:$("#awa").value.trim()})); toast("Ajustes guardados"); };
   $("#atest").onclick=()=>printTicket({num:0,nombre:"Prueba",comensales:[{id:"x",nombre:"Cliente",items:[{id:"1",cant:2,nombre:"Frappé taro",precio:65},{id:"2",cant:1,nombre:"Boneless 250 g",precio:120,nota:"BBQ"}]}]},null);
   const drawQR=url=>{ const box=$("#qrbox"); box.innerHTML=""; if(!url) return; if(typeof QRCode==="undefined"){ box.textContent="No se pudo cargar el generador de QR."; return; } new QRCode(box,{text:url,width:220,height:220,colorDark:"#2B1745",colorLight:"#ffffff",correctLevel:QRCode.CorrectLevel.M}); $("#qrWrap").classList.remove("hidden"); };
   $("#genqr").onclick=()=>{ const u=$("#aq").value.trim(); if(!/^https?:\/\//i.test(u)){ toast("Pega un enlace que empiece con https://"); return; } Store.save("config","main",Object.assign(cfg(),{qrUrl:u})); drawQR(u); };

@@ -1,4 +1,4 @@
-# BubaManía · versión 1.6.0
+# BubaManía · versión 1.6.1
 
 App de pedidos (en local, para llevar y a domicilio), cuentas por persona, meseros, propinas, reparto, cocina, caja, menú con QR y tickets.
 
@@ -116,6 +116,13 @@ Edita o vuelve a subir `index.html` o `menu.html` en GitHub. Los productos, prec
 - En el plan gratuito de Supabase, los proyectos sin actividad por un tiempo pueden pausarse. Revisa las condiciones vigentes en supabase.com/pricing.
 
 ## Historial de versiones
+
+**1.6.1**
+- Botón **Pedidos a domicilio por WhatsApp** en el menú del cliente (`menu.html`), con el teléfono a la vista y una pastilla flotante **Pedir** que aparece al bajar.
+- La misma franja en el **menú en PDF**, con código QR que abre el chat de WhatsApp ya con el mensaje escrito, y un recuadro grande de cierre en la última hoja.
+- El teléfono también sale en el pie de todas las hojas del PDF.
+- Nuevo campo **WhatsApp para pedidos a domicilio** en Ajustes: acepta los 10 dígitos o el enlace completo de `wa.me`. Si se deja vacío se usa el 476 113 4044.
+- El menú en PDF quedó más compacto: sigue cabiendo en 3 hojas con la franja nueva.
 
 **1.6.0**
 - Nueva página `menu-pdf.html`: arma el menú en hojas tamaño carta con el fondo de agua, calcula solo cuántas páginas hacen falta y se guarda como PDF desde el propio celular.

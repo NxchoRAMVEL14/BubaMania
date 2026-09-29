@@ -11,7 +11,7 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fredoka:wght@500;600;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="config.js?v=1.5.2"></script>
+<script src="config.js?v=1.6.1"></script>
 <script>
 /* Respaldo: si config.js falta, está en caché o trae valores de ejemplo, se usan los datos de BubaManía */
 (function(){ var c=window.BUBA_CONFIG||{};
@@ -83,6 +83,20 @@ h1{font-size:40px;font-weight:700;line-height:1.05;color:#fff}
 .cats a{flex:none;text-decoration:none;color:#08305F;background:rgba(255,255,255,.92);
   padding:7px 14px;border-radius:999px;font-weight:700;font-size:14px;white-space:nowrap}
 
+.wa{display:flex;align-items:center;justify-content:center;gap:10px;margin:16px 0 0;
+  background:#25D366;color:#06351C;text-decoration:none;font-weight:700;font-size:16.5px;
+  padding:14px 18px;border-radius:16px;box-shadow:0 10px 26px rgba(3,26,63,.32)}
+.wa svg{width:24px;height:24px;flex:none}
+.wa small{display:block;font-weight:700;font-size:17px;letter-spacing:.3px;opacity:.92}
+.flota{position:fixed;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));z-index:6;
+  display:flex;align-items:center;gap:8px;background:#25D366;color:#06351C;text-decoration:none;
+  font-weight:700;font-size:15px;padding:12px 18px;border-radius:999px;
+  box-shadow:0 10px 26px rgba(3,26,63,.42);
+  opacity:0;transform:translateY(14px);pointer-events:none;transition:opacity .25s ease,transform .25s ease}
+body.bajo .flota{opacity:1;transform:none;pointer-events:auto}
+.flota svg{width:22px;height:22px}
+@media (prefers-reduced-motion:reduce){.flota{transition:none}}
+
 .tarjeta{background:var(--panel);border:1.5px solid var(--borde);border-radius:24px;
   padding:14px 18px 6px;margin:18px 0;box-shadow:0 14px 34px rgba(3,26,63,.28);
   backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px)}
@@ -135,6 +149,10 @@ footer a{color:#fff}
     <img src="logo.jpg" alt="Logotipo de BubaManía" class="mlogo">
     <div><h1 id="biz">BubaManía</h1><p id="sub">Cargando menú…</p></div>
   </div>
+  <a class="wa" id="wa" href="#" target="_blank" rel="noopener">
+    <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>
+    <span>Pedidos a domicilio por WhatsApp<small id="waTel"></small></span>
+  </a>
   <div class="barra" id="barra">
     <a class="marca" href="#arriba" aria-label="Volver arriba">
       <img src="logo.jpg" alt=""><b id="biz2">BubaManía</b>
@@ -149,6 +167,10 @@ footer a{color:#fff}
     <a href="aviso-privacidad.html">Aviso de privacidad</a>
   </footer>
 </main>
+<a class="flota" id="waF" href="#" target="_blank" rel="noopener">
+  <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M17.5 14.4c-.3-.2-1.8-.9-2-1-.3-.1-.5-.2-.7.1-.2.3-.7 1-.9 1.2-.2.2-.3.2-.6.1-.3-.2-1.3-.5-2.4-1.5-.9-.8-1.5-1.8-1.7-2.1-.2-.3 0-.5.1-.6l.5-.6c.1-.2.2-.3.3-.5 0-.2 0-.4 0-.5 0-.2-.7-1.6-.9-2.2-.2-.6-.5-.5-.7-.5h-.6c-.2 0-.5.1-.8.4-.3.3-1 1-1 2.5s1.1 2.9 1.2 3.1c.1.2 2.1 3.2 5 4.5.7.3 1.2.5 1.7.6.7.2 1.3.2 1.8.1.6-.1 1.8-.7 2-1.4.2-.7.2-1.3.2-1.4-.1-.1-.3-.2-.5-.3z"/><path d="M12 2a10 10 0 0 0-8.6 15L2 22l5.1-1.3A10 10 0 1 0 12 2zm0 18.2c-1.6 0-3.1-.4-4.4-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2z"/></svg>
+  Pedir
+</a>
 
 <script>
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -156,15 +178,32 @@ const money=n=>{ const v=Number(n)||0; if(v===0) return "Gratis";
   return new Intl.NumberFormat("es-MX",{style:"currency",currency:"MXN",
     minimumFractionDigits:Number.isInteger(v)?0:2}).format(v); };
 const slug=s=>String(s).toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]+/g,"-");
+const WA_DEF="https://wa.me/524761134044?text=%C2%A1Hola!%20Quiero%20hacer%20un%20pedido%20en%20BUBAMANIA";
+function waPedidos(c){
+  const v=String((c&&c.whatsappPedidos)||"").trim();
+  if(/^https?:\/\//i.test(v)) return v;
+  const d=v.replace(/\D/g,"");
+  if(d.length>=10) return `https://wa.me/${d.length===10?"52"+d:d}?text=`+
+    encodeURIComponent("¡Hola! Quiero hacer un pedido en BUBAMANIA");
+  return WA_DEF;
+}
+function waTexto(u){ const m=u.match(/wa\.me\/(\d+)/); if(!m) return "";
+  let d=m[1]; if(d.length===12&&d.startsWith("52")) d=d.slice(2);
+  return d.length===10 ? d.replace(/(\d{3})(\d{3})(\d{4})/,"$1 $2 $3") : d; }
 const aviso=t=>{ document.getElementById("menu").innerHTML=`<div class="aviso">${esc(t)}</div>`; };
 /* El logo y el nombre aparecen en la barra fija al bajar */
 (function(){
   const barra=document.getElementById("barra"), top=document.getElementById("arriba");
   if(!barra||!top) return;
-  if(!("IntersectionObserver" in window)){ barra.classList.add("fija"); return; }
-  new IntersectionObserver(([e])=>barra.classList.toggle("fija", !e.isIntersecting),
+  if(!("IntersectionObserver" in window)){ barra.classList.add("fija"); document.body.classList.add("bajo"); return; }
+  new IntersectionObserver(([e])=>{ barra.classList.toggle("fija", !e.isIntersecting);
+      document.body.classList.toggle("bajo", !e.isIntersecting); },
     {rootMargin:"-56px 0px 0px 0px", threshold:0}).observe(top);
 })();
+
+(function(){ const u=WA_DEF, t=waTexto(u);
+  document.getElementById("wa").href=u; document.getElementById("waF").href=u;
+  document.getElementById("waTel").textContent=t||""; })();
 
 (async()=>{
   const C=window.BUBA_CONFIG||{};
@@ -178,6 +217,9 @@ const aviso=t=>{ document.getElementById("menu").innerHTML=`<div class="aviso">$
   document.getElementById("biz").textContent=biz;
   document.getElementById("biz2").textContent=biz; document.title="Menú · "+biz;
   document.getElementById("sub").textContent=cfg.direccion||"Nuestro menú";
+  const wa=waPedidos(cfg), waT=waTexto(wa);
+  document.getElementById("wa").href=wa; document.getElementById("waF").href=wa;
+  document.getElementById("waTel").textContent=waT||"";
   const ps=m.data.map(r=>Object.assign({id:r.id},r.data)).sort((a,b)=>(a.orden??0)-(b.orden??0)||String(a.nombre).localeCompare(b.nombre));
   const cats=[...new Set([...(cfg.categorias||[]),...ps.map(p=>p.cat)])].filter(ct=>ps.some(p=>p.cat===ct));
   document.getElementById("cats").innerHTML=cats.map(ct=>`<a href="#${slug(ct)}">${esc(ct)}</a>`).join("");
